@@ -1,10 +1,14 @@
 # a math loop that sleeps and dreams
 
-A self-referring attention loop operating on finite memory through five steps
-(observe, accumulate, retrieve, consolidate, capture), governed by a
-three-level hierarchy of simplex maps. Five definitions produce the entire
-loop. 103 properties follow inevitably. The loop must sleep or permanently
-degenerate.
+What if attention fed back into itself?
+
+It becomes a loop. The loop changes what it pays attention to based on what it experiences and its past reactions. So, we tried to find the bare minimum. We followed until nothing else could be removed. Every component falls into one of three categories: some choices are mathematically forced (there's no other option), others are invariant symmetries (they behave the same without breaking the loop), and the rest specify the domain (the world and content the loop is in).
+
+Five definitions define the entire loop. One hundred three properties follow inevitably. The loop functions as a carrying capacity: capture grows memory monotonically, each addition strictly diluting retrieval weights. The required score gap grows as $\log|M|$ while achievable gaps remain bounded, so past a finite critical size $|M^*|$, retrieval degenerates. Consolidation reverses this degradation via Lyapunov contraction, but the process is self-limiting. In short, the loop must sleep or permanently degenerate. From this, information fades predictably, there is a best time to retrieve, using it reshapes everything the loop holds, and the loop cannot help but alternate between wake and sleep. During sleep, the loop retrieves without capturing. It dreams.
+
+We formally verified every proof in Lean 4 with zero unresolved goals and no assumptions beyond standard mathematics.
+
+The loop changes what it pays attention to based on experience and past reactions. Organisms do the same. The loop must sleep or it dies. Organisms must sleep or they die. Why are they the same?
 
 ## What's here
 
