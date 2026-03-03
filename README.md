@@ -238,11 +238,10 @@ CI runs automatically on every push and pull request. The pipeline checks:
 5. `#print axioms mainTheorem` shows only standard Lean axioms
 6. `MainTheorem.lean` imports only Mathlib (no project dependencies)
 7. **lean4checker** replays all declarations through a fresh kernel
-8. **comparator** verifies `ProofOfMainTheorem` proves exactly the statement in `MainTheorem`
 
-Run locally with `./scripts/validate.sh` (steps 7-8 require
-[lean4checker](https://github.com/leanprover/lean4checker) and
-[comparator](https://github.com/leanprover/comparator) installed).
+Run locally with `./scripts/validate.sh` (step 7 requires
+[lean4checker](https://github.com/leanprover/lean4checker)).
+**comparator** verification requires Linux landlock; use the Dockerfile.
 See [`VERIFICATION_GUIDE.md`](VERIFICATION_GUIDE.md) for details.
 
 ### Manual verification
