@@ -1,0 +1,271 @@
+/* SleepLoop blueprint theme — pastel purple, Nunito, clean */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap');
+
+/* ── Base ─────────────────────────────────────────────────── */
+
+body {
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #2d2640;
+  background-color: #faf8ff;
+  line-height: 1.6;
+}
+
+::selection {
+  color: #fff;
+  background: #9b7fd4;
+}
+
+::-moz-selection {
+  color: #fff;
+  background: #9b7fd4;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+
+body > header {
+  background: #ede8f5;
+  border-bottom: 1px solid #d8cef0;
+  color: #3d2e5c;
+}
+
+h1#doc_title {
+  color: #3d2e5c;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+#doc_title a,
+#doc_title a:visited {
+  color: #3d2e5c;
+}
+
+/* ── Headings ─────────────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Nunito', sans-serif;
+  color: #3d2e5c;
+}
+
+h1 { font-weight: 700; }
+h2 { font-weight: 600; color: #4a3870; }
+h3, h4 { color: #5a4580; }
+
+/* ── Links ────────────────────────────────────────────────── */
+
+a {
+  color: #7c5cbf;
+  text-decoration-color: #c4b5e0;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: #5a3d9e;
+  text-decoration-color: #9b7fd4;
+}
+
+a:visited {
+  color: #8b6fb8;
+}
+
+/* ── Sidebar / TOC ────────────────────────────────────────── */
+
+nav.toc {
+  background-color: #f5f1fc;
+  border-right: 1px solid #e4ddf2;
+}
+
+.toc ul a {
+  color: #4a3870;
+  font-family: 'Nunito', sans-serif;
+}
+
+.toc ul a:hover {
+  background: #ede8f5;
+  color: #3d2e5c;
+}
+
+.toc ul li.current {
+  background-color: #ede8f5;
+}
+
+.toc ul li {
+  background-color: #f5f1fc;
+}
+
+span.expand-toc {
+  color: #8b6fb8;
+}
+
+svg.close-toc {
+  color: #5a4580;
+}
+
+/* ── Content ──────────────────────────────────────────────── */
+
+div.content {
+  line-height: 1.65;
+  font-size: 1rem;
+}
+
+div.content-wrapper {
+  max-width: 72ch;
+}
+
+/* ── Theorem blocks ───────────────────────────────────────── */
+
+div[class$="_thmwrapper"] {
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-left: 3px solid #c4b5e0;
+  background: #f9f7fe;
+  border-radius: 0 6px 6px 0;
+}
+
+div[class$="_thmwrapper"]:target {
+  animation: highlight-pulse 1s ease;
+}
+
+@keyframes highlight-pulse {
+  0% { background-color: #e4ddf2; border-left-color: #7c5cbf; }
+  100% { background-color: #f9f7fe; border-left-color: #c4b5e0; }
+}
+
+div[class$="_thmheading"] {
+  color: #4a3870;
+  font-family: 'Nunito', sans-serif;
+}
+
+div[class$="_thmcontent"] {
+  color: #2d2640;
+}
+
+/* Definition blocks — slightly different accent */
+div.theorem-style-definition div[class$="_thmwrapper"] {
+  border-left-color: #a8d4c4;
+  background: #f6fbf9;
+}
+
+/* Remark blocks — subtle */
+div.theorem-style-remark div[class$="_thmwrapper"] {
+  border-left-color: #d4cce0;
+  background: #fcfbfe;
+}
+
+/* ── Proofs ───────────────────────────────────────────────── */
+
+div[class$="proof_heading"] {
+  color: #5a4580;
+  font-family: 'Nunito', sans-serif;
+}
+
+div.proof_content {
+  color: #3d3555;
+}
+
+span.qed {
+  color: #9b7fd4;
+}
+
+/* ── Math ─────────────────────────────────────────────────── */
+
+div.equation {
+  margin: 1.25rem 0;
+}
+
+div.displaymath {
+  margin: 0.75rem 0;
+}
+
+/* ── Bottom nav ───────────────────────────────────────────── */
+
+nav.prev_up_next {
+  background: #ede8f5;
+  border-top: 1px solid #d8cef0;
+}
+
+nav.prev_up_next a {
+  color: #4a3870;
+}
+
+nav.prev_up_next a:hover {
+  color: #7c5cbf;
+}
+
+/* ── Tables ───────────────────────────────────────────────── */
+
+.tabular {
+  color: #2d2640;
+  background-color: #fff;
+}
+
+.tabular th {
+  border-bottom: 2px solid #d8cef0;
+}
+
+.tabular td {
+  border-bottom: 1px solid #ede8f5;
+}
+
+/* ── Code / verbatim ──────────────────────────────────────── */
+
+code.verb {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  background: #f3effc;
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+pre.verbatim {
+  background-color: #f3effc;
+  border: 1px solid #e4ddf2;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+}
+
+/* ── Footnotes ────────────────────────────────────────────── */
+
+footer#footnotes {
+  border-top-color: #d8cef0;
+}
+
+footer#footnotes h1 {
+  color: #4a3870;
+}
+
+/* ── Modal ────────────────────────────────────────────────── */
+
+div.modal-content {
+  border-color: #d8cef0;
+}
+
+div.modal-content header {
+  background: #ede8f5;
+  color: #3d2e5c;
+}
+
+div.modal-content header h1 {
+  color: #3d2e5c;
+}
+
+/* ── Scrollbar (webkit) ───────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f1fc;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c4b5e0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9b7fd4;
+}

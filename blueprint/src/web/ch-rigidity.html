@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>a math loop that sleeps and dreams: Rigidity</title>
+<link rel="next" href="ch-core.html" title="Core Dynamics" />
+<link rel="prev" href="sect0001.html" title="Definitions" />
+<link rel="up" href="index.html" title="a math loop that sleeps and dreams" />
+<link rel="stylesheet" href="styles/theme-white.css" /><link rel="stylesheet" href="styles/theme-sleepy.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">a math loop that sleeps and dreams</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref">1</span> <span class="toc_entry">Definitions</span></a>
+ </li>
+<li class=" active current">
+  <a href="ch-rigidity.html"><span class="toc_ref">2</span> <span class="toc_entry">Rigidity</span></a>
+ </li>
+<li class="">
+  <a href="ch-core.html"><span class="toc_ref">3</span> <span class="toc_entry">Core Dynamics</span></a>
+ </li>
+<li class="">
+  <a href="ch-sleep.html"><span class="toc_ref">4</span> <span class="toc_entry">Sleep Dynamics</span></a>
+ </li>
+<li class="">
+  <a href="ch-capture.html"><span class="toc_ref">5</span> <span class="toc_entry">Capture-Consolidation Cycle</span></a>
+ </li>
+<li class="">
+  <a href="ch-technical.html"><span class="toc_ref">6</span> <span class="toc_entry">Technical Lemmas</span></a>
+ </li>
+<li class="">
+  <a href="ch-appendix.html"><span class="toc_ref">7</span> <span class="toc_entry">Appendix</span></a>
+ </li>
+<li class="">
+ </li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="ch:rigidity">2 Rigidity</h1>
+
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:consolidation_rigidity">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">6</span>
+    <span class="proposition_thmtitle">Structural invariance; \(\mathcal{A}/\mathcal{A}_+/\mathrm{softmax}\)</span>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  blend_rate_at_one_forced def:consolidation Let \(\mathcal{A}\) denote the class of all simplex maps \(\varphi \colon \mathbb {R}^n \to \Delta ^n\), let \(\mathcal{A}_+\) denote the subclass of <em>positive order-preserving</em> simplex maps (\(\varphi (x)_i {\gt} 0\) for all \(i,x\), and \(x_i {\gt} x_j \implies \varphi (x)_i {\gt} \varphi (x)_j\)), and let \(\mathcal{L}\) denote the class of admissible blend rates: continuous \(\lambda \colon [0,1] \to [0,1]\) with \(\lambda (0) = 1\), \(\lambda (1) = 0\), and \(\lambda (r) {\gt} 0\) on \([0,1)\). </p>
+<ol class="enumerate">
+  <li><p><b class="bfseries">Forced boundary conditions.</b> The boundary values \(\lambda (1) = 0\) and \(\lambda (0) = 1\) are forced: violating the first destroys retrieval-gated stability (Lemma&#160;<a href="ch-core.html#lem:stability">20</a>); violating the second leaves unretrieved impressions permanently frozen. </p>
+</li>
+  <li><p><b class="bfseries">Invariance.</b> Each result in this paper holds at one of three levels of the containment \(\mathcal{A} \supset \mathcal{A}_+ \supset \{ \operatorname {softmax}\} \), and states which level it requires. Results with no hypothesis on \(\varphi \) hold for all \((\varphi , \lambda ) \in \mathcal{A} \times \mathcal{L}\). Results marked “under any positive \(\varphi \)” hold for all \((\varphi , \lambda ) \in \mathcal{A}_+ \times \mathcal{L}\); their proofs use only \(w_j {\gt} 0\) and not the exponential form. Results marked “under softmax” require the specific form \(\varphi (x)_i = \exp (x_i)/\sum _j \exp (x_j)\). </p>
+</li>
+</ol>
+<p> All results are \(\lambda \)-invariant except where explicitly noted. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000010">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:consolidation See Lean source: <span class="ttfamily">Rigidity/ConsolidationRigidity.lean</span> </p>
+
+  </div>
+</div>
+<div class="remark_thmwrapper theorem-style-remark" id="rem:invariance">
+  <div class="remark_thmheading">
+    <span class="remark_thmcaption">
+    Remark
+    </span>
+    <span class="remark_thmlabel">7</span>
+  </div>
+  <div class="remark_thmcontent">
+  <p> blend_rate_at_one_forced def:consolidation The containment \(\mathcal{A} \supset \mathcal{A}_+ \supset \{ \operatorname {softmax}\} \) structures the paper: the majority of results hold at the broadest level, a further group requires only positivity, and the quantitative bounds use the exponential form. Each result states which level it requires. The system is also invariant across blend rates: the accumulation scaling \(f(t) \sim t\) (Proposition&#160;<a href="ch-rigidity.html#prop:rigidity">9</a>) and the capture threshold \(\max \) (Proposition&#160;<a href="ch-rigidity.html#prop:capture_rigidity">11</a>) are forced, and the sleep results hold for any \(\lambda \in \mathcal{L}\). The default \(\lambda (r) = 1 - r\) is the simplest admissible interpolant and the unique one for which the displacement-to-deficit ratio \(\lambda (r)/(1-r) = 1\) is constant, but no result depends on this specific choice. </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:capture_scale_invariant">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">8</span>
+    <span class="corollary_thmtitle">Scale invariance of the capture decision; \(\mathcal{A}\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  capture_scale_invariant def:capture For any \(\beta {\gt} 0\), the capture decision under query \(q' = \beta q\) is identical to that under \(q\): \(q'^\top E(\tau ) {\gt} \max _{k \in M} q'^\top m_k\) if and only if \(q^\top E(\tau ) {\gt} \max _{k \in M} q^\top m_k\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000011">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:capture See Lean source: <span class="ttfamily">Rigidity/CaptureScaleInvariant.lean</span> </p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:rigidity">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">9</span>
+    <span class="proposition_thmtitle">Rigidity of the accumulation rate; \(\mathcal{A}\)</span>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  accumulateC_general def:accumulation Replace \(t+1\) with an arbitrary scaling \(f(t)\) in the accumulation rule: \(C_{t+1} = C_t + a_t \cdot f(t)/C_t\). For \(\sigma = C/N\) to converge to a nonzero finite constant under persistent observation (\(a \geq \delta {\gt} 0\)), \(f(t) \sim t\) is necessary. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000012">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:accumulation See Lean source: <span class="ttfamily">Rigidity/AccumulationRigidity.lean</span> </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:idempotent">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">10</span>
+    <span class="lemma_thmtitle">Idempotent capture; \(\mathcal{A}\)</span>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  capture_idempotent def:capture For a fixed query \(q\) and fixed \(M\), capture applied twice yields the same result as capture applied once. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000013">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:capture See Lean source: <span class="ttfamily">Rigidity/IdempotentCapture.lean</span> </p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:capture_rigidity">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">11</span>
+    <span class="proposition_thmtitle">Rigidity of the capture threshold; \(\mathcal{A}\)</span>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  MemorylessThreshold def:capture, lem:idempotent Among parameter-free, always-defined, memoryless thresholds, \(\max \) is the unique one consistent with idempotent capture (Lemma&#160;<a href="ch-rigidity.html#lem:idempotent">10</a>). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000014">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:capture, lem:idempotent See Lean source: <span class="ttfamily">Rigidity/CaptureRigidity.lean</span> </p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:step_ablation">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">12</span>
+    <span class="proposition_thmtitle">Necessity of each step; \(\mathcal{A}\); items (iv)–(v) use \(\mathcal{A}_+\)/softmax results</span>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  without_observe_fails def:accumulation, def:admissible_scoring, def:capture, def:consolidation, def:observation, def:retrieval, def:observation Removing any single step from the loop causes at least one of the following to fail: boundedness (\(\sigma = O(1)\)), non-degeneracy (\(a \geq \alpha {\gt} 0\)), the feedback property (memory influences observation), or the forced capture–consolidation cycle. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000015">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:accumulation, def:admissible_scoring, def:capture, def:consolidation, def:observation, def:retrieval, def:observation See Lean source: <span class="ttfamily">Rigidity/StepAblation.lean</span> </p>
+
+  </div>
+</div>
+<div class="remark_thmwrapper theorem-style-remark" id="rem:rigidity_summary">
+  <div class="remark_thmheading">
+    <span class="remark_thmcaption">
+    Remark
+    </span>
+    <span class="remark_thmlabel">13</span>
+    <span class="remark_thmtitle">Rigidity summary</span>
+  </div>
+  <div class="remark_thmcontent">
+  <p>  forcedComponents cor:capture_scale_invariant, lem:idempotent, prop:accum_aggregate, prop:accum_sublinear, prop:accum_superlinear, prop:capture_rigidity, prop:consolidation_rigidity, prop:pipeline_rigidity, prop:rigidity, prop:scoring_additivity, prop:step_ablation, prop:target_axioms, rem:invariance Every component of the system falls into one of three categories. </p>
+<ol class="enumerate">
+  <li><p><em>Forced.</em> The accumulation scaling \(f(t) \sim t\) (Proposition&#160;<a href="ch-rigidity.html#prop:rigidity">9</a>), the capture threshold \(\max \) (Proposition&#160;<a href="ch-rigidity.html#prop:capture_rigidity">11</a>), the blend-rate boundaries \(\lambda (0) = 1\), \(\lambda (1) = 0\) (Proposition&#160;<a href="ch-rigidity.html#prop:consolidation_rigidity">6</a>), the dot-product scoring \(s_j = q^\top m_j\) (Proposition&#160;<a href="ch-rigidity.html#prop:pipeline_rigidity">14</a>), and the feedback readout \(E^\top \) (Proposition&#160;<a href="ch-rigidity.html#prop:pipeline_rigidity">14</a>) are uniquely determined by consistency requirements among linear, parameter-free maps. No alternative within this class exists. </p>
+</li>
+  <li><p><em>Invariant.</em> The simplex map \(\varphi \in \mathcal{A}\), the blend-rate interior \(\lambda \in \mathcal{L}\), and the query map \(q = aF\) for any \(R\)-bounded \(F\) (Proposition&#160;<a href="ch-rigidity.html#prop:pipeline_rigidity">14</a>(a)) are free choices, but the results do not depend on which admissible choice is made. Replacing one admissible \(\varphi \), \(\lambda \), or \(F\) with another changes no theorem at its stated level. </p>
+</li>
+  <li><p><em>Instance-defining.</em> The embedding \(E\), linear map \(K\) (Proposition&#160;<a href="ch-rigidity.html#prop:pipeline_rigidity">14</a>(d)), consolidation target \(T_j\) (Proposition&#160;<a href="ch-rigidity.html#prop:target_axioms">15</a>), scoring rule \(S' = h(S, \sigma , b)\) (Proposition&#160;<a href="ch-rigidity.html#prop:scoring_additivity">17</a>), and the choice between soft and hard retrieval (Proposition&#160;<a href="ch-rigidity.html#prop:pipeline_rigidity">14</a>(c)) specify which system one is studying. The admissible class for each is characterized by the referenced propositions. </p>
+</li>
+</ol>
+<p> Each of the five steps is necessary (Proposition&#160;<a href="ch-rigidity.html#prop:step_ablation">12</a>). The retrieval pipeline requires exactly four operations; no three-step pipeline suffices (Proposition&#160;<a href="ch-rigidity.html#prop:pipeline_rigidity">14</a>). Given any instance, zero tunable numerical parameters remain: the dynamics are fully determined by the definitions. </p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:pipeline_rigidity">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">14</span>
+    <span class="proposition_thmtitle">Rigidity of the retrieval pipeline</span>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  query_bounded def:consolidation, def:retrieval The retrieval pipeline </p>
+<div class="displaymath" id="a0000000016">
+  \[  q = aE, \quad w = \varphi (qM^\top ), \quad \ell = wM, \quad b = EK\ell  \]
+</div>
+<p> is determined (up to the instance-defining parameter \(K\)) by the following requirements: </p>
+<ol class="enumerate">
+  <li><p>The query map is invariant: for any linear map \(F\colon X \to \mathbb {R}^d\) with \(\| F(\tau )\|  \leq R\) for all \(\tau \), the query \(q = aF\) satisfies \(\| q\|  \leq R\); conversely, \(\| aF\|  \leq R\) for all \(a \in \Delta ^{|X|}\) forces \(\| F(\tau )\|  \leq R\) (take \(a = \delta _\tau \)). Thus the class of admissible query maps is exactly the \(R\)-bounded linear maps. \(E\) is the canonical zero-parameter representative. The bounded score gap \(g \leq 2R^2\) (Theorem&#160;<a href="ch-sleep.html#thm:sleep_pressure">47</a>(iii)) requires only \(\| q\|  \leq R\). </p>
+</li>
+  <li><p>The dot-product scoring \(s_j = q^\top m_j\) is forced: the capture-argmax bound (Theorem&#160;<a href="ch-capture.html#thm:capture_argmax">75</a>) requires that \(s_j\) be linear in \(m_j\), so that the maximum over \(\operatorname {conv}(E(X))\) is achieved at a vertex. Among parameter-free bilinear forms, \(q^\top m_j\) is unique. </p>
+</li>
+  <li><p>\(\ell = wM\) is instance-defining: hard retrieval \(\ell = m_v\) preserves every theorem except the quantitative dream-trace decay bound (Theorem&#160;<a href="ch-sleep.html#thm:dream_amnesia">73</a>(iii)), whose Jacobian chain requires a smooth readout. </p>
+</li>
+  <li><p>\(E\) in the feedback \(b = EK\ell \) is forced as the unique parameter-free map \(\mathbb {R}^d \to \mathbb {R}^{|X|}\). \(K\) is instance-defining: \(K = I\) preserves all theorems. </p>
+</li>
+</ol>
+<p> No pipeline with fewer than four operations produces the same phenomena: the chain \(\Delta ^{|X|} \xrightarrow {q=aE} \mathbb {R}^d \xrightarrow {w=\varphi (qM^\top )} \Delta ^{|M|} \xrightarrow {\ell } \mathbb {R}^d \xrightarrow {b=EK\ell } \mathbb {R}^{|X|}\) passes through four distinct spaces, and removing any link creates a dimension mismatch, eliminates retrieval weights, removes geometric feedback, or severs the memory–observation link. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000017">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:consolidation, def:retrieval See Lean source: <span class="ttfamily">Rigidity/PipelineRigidity.lean</span> </p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:target_axioms">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">15</span>
+    <span class="proposition_thmtitle">Minimal conditions for the consolidation target</span>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  consolidationTarget_convex def:consolidation Every theorem in the paper holds under the following conditions on the consolidation target \(T_j\), and no theorem requires more: </p>
+<ol class="enumerate">
+  <li><p><b class="bfseries">Convexity.</b> \(T_j \in \operatorname {conv}(M)\) for all \(j\). </p>
+</li>
+  <li><p><b class="bfseries">Anchor positivity.</b> \(\alpha _v^{(j)} {\gt} 0\) for all \(j \neq v\). </p>
+</li>
+  <li><p><b class="bfseries">Full positivity.</b> \(\alpha _k^{(j)} {\gt} 0\) for all \(k, j\). </p>
+</li>
+  <li><p><b class="bfseries">Continuity.</b> \((M, q) \mapsto T_j(M, q)\) is continuous. </p>
+</li>
+  <li><p><b class="bfseries">Lipschitz.</b> \(m_j \mapsto T_j\) is Lipschitz. </p>
+</li>
+</ol>
+<p> The specific form \(T_j = \varphi ((m_j + q)M^\top )M\) satisfies <span class="textnormal">(T1)–(T5)</span> but is not uniquely determined by them. It is an instance-defining choice. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000018">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:consolidation See Lean source: <span class="ttfamily">Rigidity/TargetAxioms.lean</span> </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:admissible_scoring">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">16</span>
+    <span class="definition_thmtitle">Admissible scoring rule</span>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  perturbedScore A scoring rule \(h\colon \mathbb {R}^3 \to \mathbb {R}\) is <em>admissible</em> if: </p>
+<ol class="enumerate">
+  <li><p>\(h\) is \(C^1\) (hence maps bounded inputs to bounded outputs). </p>
+</li>
+  <li><p>\(h(0, \sigma , b)\) depends non-trivially on \(\sigma \) and \(b\) (sleep non-degeneracy). </p>
+</li>
+  <li><p>\(h(s, 0, 0)\) is non-degenerate in \(s\) (faithful initialization). </p>
+</li>
+</ol>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:scoring_additivity">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">17</span>
+    <span class="proposition_thmtitle">Additivity is canonical but not forced</span>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  attentionRatio def:admissible_scoring, def:observation </p>
+<ol class="enumerate">
+  <li><p>Every theorem in the paper holds under any admissible \(S'(\tau ) = h(S(\tau ), \sigma (\tau ), b(\tau ))\), with the same qualitative conclusions. </p>
+</li>
+  <li><p>Under softmax, \(h(s,\sigma ,b) = s + \sigma + b\) is the unique admissible rule (up to coordinatewise reparametrization) for which the attention ratio factorizes into independent evidence contributions: </p>
+<div class="displaymath" id="a0000000019">
+  \[  \frac{a(\tau _1)}{a(\tau _2)} = F_S(S(\tau _1), S(\tau _2))\cdot F_\sigma (\sigma (\tau _1), \sigma (\tau _2))\cdot F_b(b(\tau _1), b(\tau _2)).  \]
+</div>
+</li>
+  <li><p>The independent-evidence factorization is a modeling choice, not a consequence of the dynamics. </p>
+</li>
+</ol>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000020">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:admissible_scoring, def:observation See Lean source: <span class="ttfamily">Rigidity/ScoringAdditivity.lean</span> </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0001.html" title="Definitions"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="a math loop that sleeps and dreams"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="ch-core.html" title="Core Dynamics"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

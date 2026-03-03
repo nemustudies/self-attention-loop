@@ -1,0 +1,1775 @@
+% Blueprint content for SleepLoop formalization
+% Source: paper/sleep_paper.tex + SleepLoop/SleepLoop/ Lean files
+
+\section*{What if attention fed back into itself?}
+
+It becomes a loop. The loop changes what it pays attention to based on what it experiences and its past reactions. So we tried to find the bare minimum. We followed until nothing else could be removed. Every component falls into one of three categories: some choices are mathematically forced (there's no other option), others are invariant symmetries (they behave the same without breaking the loop), and the rest specify the domain (the world and content the loop is in).
+
+Five definitions define the entire loop. One hundred three properties follow inevitably. The loop functions as a carrying capacity: capture grows memory monotonically, each addition strictly diluting retrieval weights. The required score gap grows as $\log|M|$ while achievable gaps remain bounded, so past a finite critical size $|M^*|$, retrieval degenerates. Consolidation reverses this degradation via Lyapunov contraction, but the process is self-limiting. In short, the loop must sleep or permanently degenerate. From this, information fades predictably, there is a best time to retrieve, using it reshapes everything the loop holds, and the loop cannot help but alternate between wake and sleep. During sleep, the loop retrieves without capturing. It dreams.
+
+The loop changes what it pays attention to based on experience and past reactions. Organisms do the same. The loop must sleep or it dies. Organisms must sleep or they die. Why are they the same?
+
+Every proof has been formally verified in Lean 4 with zero unresolved goals and no assumptions beyond standard mathematics. This blueprint records the proof architecture: every theorem below links to its Lean 4 source.
+
+\chapter{Definitions}
+
+\begin{definition}[Observation (Step 1)]
+\label{def:observation}
+\lean{observe}
+\leanok
+The perturbed score combines base salience, cumulative attention, and retrieval feedback:
+\begin{equation}
+S'(\tau) = S(\tau) + \sigma(\tau) + b(\tau)
+\end{equation}
+Attention is then allocated by applying a simplex map:
+\begin{equation}
+a = \varphi(S') \in [0,1]^{|X|}
+\end{equation}
+\end{definition}
+
+\begin{definition}[Accumulation (Step 2)]
+\label{def:accumulation}
+\lean{accumulateC}
+\leanok
+\begin{align}
+C_{t+1}(\tau) &= C_t(\tau) + a_t(\tau) \cdot \frac{t+1}{C_t(\tau)} \\
+N_{t+1}(\tau) &= N_t(\tau) + 1 \\
+\sigma_{t+1}(\tau) &= \frac{C_{t+1}(\tau)}{N_{t+1}(\tau)}
+\end{align}
+\end{definition}
+
+\begin{definition}[Retrieval (Step 3)]
+\label{def:retrieval}
+\lean{queryVector}
+\leanok
+\begin{align}
+q &= aE \\
+w &= \varphi(q\,M^\top) \\
+\ell(q, M) &= wM \\
+b &= EK\ell
+\end{align}
+\end{definition}
+
+\begin{definition}[Consolidation (Step 4)]
+\label{def:consolidation}
+\lean{consolidationTarget}
+\leanok
+\uses{def:retrieval}
+\begin{align}
+\lambda_j &= \lambda\!\left(\frac{w_j}{\max_{k \in M}\,w_k}\right) \\
+T(M, q) &= \varphi\bigl((M + q)\,M^\top\bigr)\,M \\
+M' &= (1 - \lambda)\,M + \lambda\,T(M, q)
+\end{align}
+\end{definition}
+
+\begin{definition}[Capture (Step 5)]
+\label{def:capture}
+\lean{captureThreshold}
+\leanok
+\uses{def:retrieval}
+Adopting the convention $\max \emptyset = -\infty$:
+\begin{equation}
+M_{t+1} = M_t \cup \{E(\tau) : q^\top E(\tau) > \max_{k \in M_t}\,q^\top m_k\}
+\end{equation}
+\end{definition}
+
+\chapter{Rigidity}\label{ch:rigidity}
+
+\begin{proposition}[Structural invariance; $\mathcal{A}/\mathcal{A}_+/\mathrm{softmax}$]
+\label{prop:consolidation_rigidity}
+\lean{blend_rate_at_one_forced}
+\leanok
+\uses{def:consolidation}
+Let $\mathcal{A}$ denote the class of all simplex maps $\varphi\colon \mathbb{R}^n \to \Delta^n$, let $\mathcal{A}_+$ denote the subclass of \emph{positive order-preserving} simplex maps ($\varphi(x)_i > 0$ for all $i,x$, and $x_i > x_j \implies \varphi(x)_i > \varphi(x)_j$), and let $\mathcal{L}$ denote the class of admissible blend rates: continuous $\lambda\colon [0,1] \to [0,1]$ with $\lambda(0) = 1$, $\lambda(1) = 0$, and $\lambda(r) > 0$ on $[0,1)$.
+\begin{enumerate}
+\item \textbf{Forced boundary conditions.} The boundary values $\lambda(1) = 0$ and $\lambda(0) = 1$ are forced: violating the first destroys retrieval-gated stability (Lemma~\ref{lem:stability}); violating the second leaves unretrieved impressions permanently frozen.
+\item \textbf{Invariance.} Each result in this paper holds at one of three levels of the containment $\mathcal{A} \supset \mathcal{A}_+ \supset \{\operatorname{softmax}\}$, and states which level it requires.  Results with no hypothesis on $\varphi$ hold for all $(\varphi, \lambda) \in \mathcal{A} \times \mathcal{L}$.  Results marked ``under any positive $\varphi$'' hold for all $(\varphi, \lambda) \in \mathcal{A}_+ \times \mathcal{L}$; their proofs use only $w_j > 0$ and not the exponential form.  Results marked ``under softmax'' require the specific form $\varphi(x)_i = \exp(x_i)/\sum_j \exp(x_j)$.
+\end{enumerate}
+All results are $\lambda$-invariant except where explicitly noted.
+\end{proposition}
+
+\begin{proof}
+\leanok
+\uses{def:consolidation}
+See Lean source: \texttt{Rigidity/ConsolidationRigidity.lean}
+\end{proof}
+
+\begin{remark}
+\label{rem:invariance}
+\lean{blend_rate_at_one_forced}
+\leanok
+\uses{def:consolidation}
+The containment $\mathcal{A} \supset \mathcal{A}_+ \supset \{\operatorname{softmax}\}$ structures the paper: the majority of results hold at the broadest level, a further group requires only positivity, and the quantitative bounds use the exponential form.  Each result states which level it requires.  The system is also invariant across blend rates: the accumulation scaling $f(t) \sim t$ (Proposition~\ref{prop:rigidity}) and the capture threshold $\max$ (Proposition~\ref{prop:capture_rigidity}) are forced, and the sleep results hold for any $\lambda \in \mathcal{L}$.  The default $\lambda(r) = 1 - r$ is the simplest admissible interpolant and the unique one for which the displacement-to-deficit ratio $\lambda(r)/(1-r) = 1$ is constant, but no result depends on this specific choice.
+\end{remark}
+
+\begin{corollary}[Scale invariance of the capture decision; $\mathcal{A}$]
+\label{cor:capture_scale_invariant}
+\lean{capture_scale_invariant}
+\leanok
+\uses{def:capture}
+For any $\beta > 0$, the capture decision under query $q' = \beta q$ is identical to that under $q$: $q'^\top E(\tau) > \max_{k \in M} q'^\top m_k$ if and only if $q^\top E(\tau) > \max_{k \in M} q^\top m_k$.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:capture}
+See Lean source: \texttt{Rigidity/CaptureScaleInvariant.lean}
+\end{proof}
+
+\begin{proposition}[Rigidity of the accumulation rate; $\mathcal{A}$]
+\label{prop:rigidity}
+\lean{accumulateC_general}
+\leanok
+\uses{def:accumulation}
+Replace $t+1$ with an arbitrary scaling $f(t)$ in the accumulation rule: $C_{t+1} = C_t + a_t \cdot f(t)/C_t$. For $\sigma = C/N$ to converge to a nonzero finite constant under persistent observation ($a \geq \delta > 0$), $f(t) \sim t$ is necessary.
+\end{proposition}
+
+\begin{proof}
+\leanok
+\uses{def:accumulation}
+See Lean source: \texttt{Rigidity/AccumulationRigidity.lean}
+\end{proof}
+
+\begin{lemma}[Idempotent capture; $\mathcal{A}$]
+\label{lem:idempotent}
+\lean{capture_idempotent}
+\leanok
+\uses{def:capture}
+For a fixed query $q$ and fixed $M$, capture applied twice yields the same result as capture applied once.
+\end{lemma}
+
+\begin{proof}
+\leanok
+\uses{def:capture}
+See Lean source: \texttt{Rigidity/IdempotentCapture.lean}
+\end{proof}
+
+\begin{proposition}[Rigidity of the capture threshold; $\mathcal{A}$]
+\label{prop:capture_rigidity}
+\lean{MemorylessThreshold}
+\leanok
+\uses{def:capture, lem:idempotent}
+Among parameter-free, always-defined, memoryless thresholds, $\max$ is the unique one consistent with idempotent capture (Lemma~\ref{lem:idempotent}).
+\end{proposition}
+
+\begin{proof}
+\leanok
+\uses{def:capture, lem:idempotent}
+See Lean source: \texttt{Rigidity/CaptureRigidity.lean}
+\end{proof}
+
+\begin{proposition}[Necessity of each step; $\mathcal{A}$; items (iv)--(v) use $\mathcal{A}_+$/softmax results]
+\label{prop:step_ablation}
+\lean{without_observe_fails}
+\leanok
+\uses{def:accumulation, def:admissible_scoring, def:capture, def:consolidation, def:observation, def:retrieval, def:observation}
+Removing any single step from the loop causes at least one of the following to fail: boundedness ($\sigma = O(1)$), non-degeneracy ($a \geq \alpha > 0$), the feedback property (memory influences observation), or the forced capture--consolidation cycle.
+\end{proposition}
+
+\begin{proof}
+\leanok
+\uses{def:accumulation, def:admissible_scoring, def:capture, def:consolidation, def:observation, def:retrieval, def:observation}
+See Lean source: \texttt{Rigidity/StepAblation.lean}
+\end{proof}
+
+\begin{remark}[Rigidity summary]
+\label{rem:rigidity_summary}
+\lean{forcedComponents}
+\leanok
+\uses{cor:capture_scale_invariant, lem:idempotent, prop:accum_aggregate, prop:accum_sublinear, prop:accum_superlinear, prop:capture_rigidity, prop:consolidation_rigidity, prop:pipeline_rigidity, prop:rigidity, prop:scoring_additivity, prop:step_ablation, prop:target_axioms, rem:invariance}
+Every component of the system falls into one of three categories.
+\begin{enumerate}
+\item \emph{Forced.}  The accumulation scaling $f(t) \sim t$ (Proposition~\ref{prop:rigidity}), the capture threshold $\max$ (Proposition~\ref{prop:capture_rigidity}), the blend-rate boundaries $\lambda(0) = 1$, $\lambda(1) = 0$ (Proposition~\ref{prop:consolidation_rigidity}), the dot-product scoring $s_j = q^\top m_j$ (Proposition~\ref{prop:pipeline_rigidity}), and the feedback readout $E^\top$ (Proposition~\ref{prop:pipeline_rigidity}) are uniquely determined by consistency requirements among linear, parameter-free maps.  No alternative within this class exists.
+\item \emph{Invariant.}  The simplex map $\varphi \in \mathcal{A}$, the blend-rate interior $\lambda \in \mathcal{L}$, and the query map $q = aF$ for any $R$-bounded $F$ (Proposition~\ref{prop:pipeline_rigidity}(a)) are free choices, but the results do not depend on which admissible choice is made.  Replacing one admissible $\varphi$, $\lambda$, or $F$ with another changes no theorem at its stated level.
+\item \emph{Instance-defining.}  The embedding $E$, linear map $K$ (Proposition~\ref{prop:pipeline_rigidity}(d)), consolidation target $T_j$ (Proposition~\ref{prop:target_axioms}), scoring rule $S' = h(S, \sigma, b)$ (Proposition~\ref{prop:scoring_additivity}), and the choice between soft and hard retrieval (Proposition~\ref{prop:pipeline_rigidity}(c)) specify which system one is studying.  The admissible class for each is characterized by the referenced propositions.
+\end{enumerate}
+Each of the five steps is necessary (Proposition~\ref{prop:step_ablation}).  The retrieval pipeline requires exactly four operations; no three-step pipeline suffices (Proposition~\ref{prop:pipeline_rigidity}).  Given any instance, zero tunable numerical parameters remain: the dynamics are fully determined by the definitions.
+\end{remark}
+
+\begin{proposition}[Rigidity of the retrieval pipeline]
+\label{prop:pipeline_rigidity}
+\lean{query_bounded}
+\leanok
+\uses{def:consolidation, def:retrieval}
+The retrieval pipeline
+\[
+q = aE, \quad w = \varphi(qM^\top), \quad \ell = wM, \quad b = EK\ell
+\]
+is determined (up to the instance-defining parameter $K$) by the following requirements:
+\begin{enumerate}
+\item The query map is invariant: for any linear map $F\colon X \to \mathbb{R}^d$ with $\|F(\tau)\| \leq R$ for all $\tau$, the query $q = aF$ satisfies $\|q\| \leq R$; conversely, $\|aF\| \leq R$ for all $a \in \Delta^{|X|}$ forces $\|F(\tau)\| \leq R$ (take $a = \delta_\tau$).  Thus the class of admissible query maps is exactly the $R$-bounded linear maps.  $E$ is the canonical zero-parameter representative.  The bounded score gap $g \leq 2R^2$ (Theorem~\ref{thm:sleep_pressure}(iii)) requires only $\|q\| \leq R$.
+\item The dot-product scoring $s_j = q^\top m_j$ is forced: the capture-argmax bound (Theorem~\ref{thm:capture_argmax}) requires that $s_j$ be linear in $m_j$, so that the maximum over $\operatorname{conv}(E(X))$ is achieved at a vertex.  Among parameter-free bilinear forms, $q^\top m_j$ is unique.
+\item $\ell = wM$ is instance-defining: hard retrieval $\ell = m_v$ preserves every theorem except the quantitative dream-trace decay bound (Theorem~\ref{thm:dream_amnesia}(iii)), whose Jacobian chain requires a smooth readout.
+\item $E$ in the feedback $b = EK\ell$ is forced as the unique parameter-free map $\mathbb{R}^d \to \mathbb{R}^{|X|}$.  $K$ is instance-defining: $K = I$ preserves all theorems.
+\end{enumerate}
+No pipeline with fewer than four operations produces the same phenomena: the chain $\Delta^{|X|} \xrightarrow{q=aE} \mathbb{R}^d \xrightarrow{w=\varphi(qM^\top)} \Delta^{|M|} \xrightarrow{\ell} \mathbb{R}^d \xrightarrow{b=EK\ell} \mathbb{R}^{|X|}$ passes through four distinct spaces, and removing any link creates a dimension mismatch, eliminates retrieval weights, removes geometric feedback, or severs the memory--observation link.
+\end{proposition}
+
+\begin{proof}
+\leanok
+\uses{def:consolidation, def:retrieval}
+See Lean source: \texttt{Rigidity/PipelineRigidity.lean}
+\end{proof}
+
+\begin{proposition}[Minimal conditions for the consolidation target]
+\label{prop:target_axioms}
+\lean{consolidationTarget_convex}
+\leanok
+\uses{def:consolidation}
+Every theorem in the paper holds under the following conditions on the consolidation target $T_j$, and no theorem requires more:
+\begin{enumerate}
+\item \textbf{Convexity.} $T_j \in \operatorname{conv}(M)$ for all $j$.
+\item \textbf{Anchor positivity.} $\alpha_v^{(j)} > 0$ for all $j \neq v$.
+\item \textbf{Full positivity.} $\alpha_k^{(j)} > 0$ for all $k, j$.
+\item \textbf{Continuity.} $(M, q) \mapsto T_j(M, q)$ is continuous.
+\item \textbf{Lipschitz.} $m_j \mapsto T_j$ is Lipschitz.
+\end{enumerate}
+The specific form $T_j = \varphi((m_j + q)M^\top)M$ satisfies \textnormal{(T1)--(T5)} but is not uniquely determined by them.  It is an instance-defining choice.
+\end{proposition}
+
+\begin{proof}
+\leanok
+\uses{def:consolidation}
+See Lean source: \texttt{Rigidity/TargetAxioms.lean}
+\end{proof}
+
+\begin{definition}[Admissible scoring rule]
+\label{def:admissible_scoring}
+\lean{perturbedScore}
+\leanok
+A scoring rule $h\colon \mathbb{R}^3 \to \mathbb{R}$ is \emph{admissible} if:
+\begin{enumerate}
+\item $h$ is $C^1$ (hence maps bounded inputs to bounded outputs).
+\item $h(0, \sigma, b)$ depends non-trivially on $\sigma$ and $b$ (sleep non-degeneracy).
+\item $h(s, 0, 0)$ is non-degenerate in $s$ (faithful initialization).
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Additivity is canonical but not forced]
+\label{prop:scoring_additivity}
+\lean{attentionRatio}
+\leanok
+\uses{def:admissible_scoring, def:observation}
+\leavevmode
+\begin{enumerate}
+\item Every theorem in the paper holds under any admissible $S'(\tau) = h(S(\tau), \sigma(\tau), b(\tau))$, with the same qualitative conclusions.
+\item Under softmax, $h(s,\sigma,b) = s + \sigma + b$ is the unique admissible rule (up to coordinatewise reparametrization) for which the attention ratio factorizes into independent evidence contributions:
+\[
+\frac{a(\tau_1)}{a(\tau_2)} = F_S(S(\tau_1), S(\tau_2))\cdot F_\sigma(\sigma(\tau_1), \sigma(\tau_2))\cdot F_b(b(\tau_1), b(\tau_2)).
+\]
+\item The independent-evidence factorization is a modeling choice, not a consequence of the dynamics.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+\leanok
+\uses{def:admissible_scoring, def:observation}
+See Lean source: \texttt{Rigidity/ScoringAdditivity.lean}
+\end{proof}
+
+\chapter{Core Dynamics}\label{ch:core}
+
+\begin{corollary}[History-independence of the lifetime counter; $\mathcal{A}$]
+\label{cor:N_history_independent}
+\lean{lifetime_counter_history_independent}
+\leanok
+\uses{def:accumulation}
+For every $\tau \in X$ and every $t \geq 0$, $N_t(\tau) = N_0 + t$.  The denominator of $\sigma = C/N$ is independent of the attention history $\{a_s(\tau)\}_{s < t}$.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:accumulation}
+See Lean source: \texttt{Core/HistoryIndependence.lean}
+\end{proof}
+
+\begin{theorem}[Selective persistence; $\mathcal{A}$]
+\label{thm:selective}
+\lean{selective_persistence_decay}
+\leanok
+\uses{def:accumulation}
+Let $\tau \in X$.
+\begin{enumerate}
+\item If $a_t(\tau) = 0$ for all $t \geq T$, then $\sigma_t(\tau) \to 0$.
+\item If $a_t(\tau) \geq \delta > 0$ for all $t$, then $\liminf_{t \to \infty} \sigma_t(\tau) \geq \sqrt{\delta}$.
+\item For any attention sequence $(a_t(\tau))_{t \geq 0} \subseteq [0,1]$, $\sigma_t(\tau) = O(1)$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\leanok
+\uses{def:accumulation}
+See Lean source: \texttt{Core/SelectivePersistence.lean}
+\end{proof}
+
+\begin{lemma}[Retrieval-gated stability; $\mathcal{A}_+$]
+\label{lem:stability}
+\lean{anchor_unchanged_by_consolidation}
+\leanok
+\uses{def:consolidation}
+Let $v = \arg\max_{k \in M} w_k$ at step $t$. Then $v$ is unchanged by consolidation, and the capture threshold in $v$'s direction never decreases.
+\end{lemma}
+
+\begin{proof}
+\leanok
+\uses{def:consolidation}
+See Lean source: \texttt{Core/RetrievalGatedStability.lean}
+\end{proof}
+
+\begin{corollary}[Monotone acquisition; $\mathcal{A}$]
+\label{cor:acquisition}
+\lean{capture_card_nondecreasing}
+\leanok
+\uses{def:capture}
+$|M|$ is non-decreasing: capture adds elements by union (Definition~\ref{def:capture}) and no operation removes them.  The capture threshold $\max_{k \in M} q^\top m_k$ is non-decreasing in $|M|$.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:capture}
+See Lean source: \texttt{Core/MonotoneAcquisition.lean}
+\end{proof}
+
+\begin{lemma}[Convex hull invariance; $\mathcal{A}$]
+\label{lem:hull}
+\lean{consolidation_target_in_hull}
+\leanok
+\uses{def:capture, def:consolidation}
+For all $t$, $\operatorname{conv}(M_t) \subseteq \operatorname{conv}(E(X))$.
+\end{lemma}
+
+\begin{proof}
+\leanok
+\uses{def:capture, def:consolidation}
+See Lean source: \texttt{Core/ConvexHullInvariance.lean}
+\end{proof}
+
+\begin{lemma}[Finite memory without consolidation; $\mathcal{A}$]
+\label{lem:finite}
+\lean{finite_memory_without_consolidation}
+\leanok
+\uses{def:capture, lem:hull}
+If consolidation is disabled (i.e.\ $\lambda \equiv 0$), then $|M_t| \leq |X|$ for all $t$.
+\end{lemma}
+
+\begin{proof}
+\leanok
+\uses{def:capture, lem:hull}
+See Lean source: \texttt{Core/FiniteMemory.lean}
+\end{proof}
+
+\begin{corollary}[Bounded retrieval bias; $\mathcal{A}$]
+\label{cor:bounded}
+\lean{feedback_bias_bounded}
+\leanok
+\uses{def:retrieval, lem:hull}
+Let $R = \max_{\tau \in X} \|E(\tau)\|$. Then $|b(\tau)| \leq R^2 \|K\|_{\mathrm{op}}$ for all $\tau$ and all $t$.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:retrieval, lem:hull}
+See Lean source: \texttt{Core/BoundedBias.lean}
+\end{proof}
+
+\begin{theorem}[Non-degeneracy; $\mathcal{A}_+$]
+\label{thm:nondegen}
+\lean{nondegeneracy}
+\leanok
+\uses{cor:bounded, def:observation, thm:selective}
+Let $\varphi \in \mathcal{A}_+$ and suppose $|S(\tau)| \leq B_S$ for all $\tau \in X$ and all $t$. Then there exists $\alpha > 0$, depending only on $\varphi$, $B_S$, $C_0$, $|X|$, $R = \max_\tau \|E(\tau)\|$, and $\|K\|_{\mathrm{op}}$, such that $a_t(\tau) \geq \alpha$ for all $\tau \in X$ and all $t \geq 0$.
+\end{theorem}
+
+\begin{proof}
+\leanok
+\uses{cor:bounded, def:observation, thm:selective}
+See Lean source: \texttt{Core/NonDegeneracy.lean}
+\end{proof}
+
+\begin{corollary}[Retrieval output lies in convex hull; $\mathcal{A}$]
+\label{cor:retrieval_in_hull}
+\lean{retrieval_in_convex_hull}
+\leanok
+\uses{def:retrieval, lem:hull}
+For any query $q$ with $M \neq \emptyset$, the retrieval output $\ell = wM$ satisfies $\ell \in \operatorname{conv}(M) \subseteq \operatorname{conv}(E(X))$.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:retrieval, lem:hull}
+See Lean source: \texttt{Core/RetrievalInHull.lean}
+\end{proof}
+
+\begin{corollary}[Query vector norm bound; $\mathcal{A}$]
+\label{cor:query_norm_bound}
+\lean{query_norm_bounded}
+\leanok
+\uses{def:retrieval}
+For any step $t$, the query vector satisfies
+$\|q_t\| \leq R$, where $R = \max_{\tau \in X} \|E(\tau)\|$.
+Moreover, $q_t \in \operatorname{conv}(E(X))$.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:retrieval}
+See Lean source: \texttt{Core/QueryNormBound.lean}
+\end{proof}
+
+\begin{corollary}[Bounds on the consolidation blend rate; $\mathcal{A}_+$]
+\label{cor:blend_rate_bounds}
+\lean{blend_rate_anchor_zero}
+\leanok
+\uses{def:consolidation}
+Under any positive $\varphi$ with $|M| \geq 2$ and $v = \arg\max_k w_k$ the unique maximizer of the retrieval weights, every blend rate satisfies $0 \leq \lambda_j \leq 1$, with $\lambda_v = 0$ for the anchor and $0 < \lambda_j \leq 1$ for all $j \neq v$.  (Under the standing choice $\lambda(r) = 1 - r$, the strict bound $\lambda_j < 1$ holds; for a general admissible $\lambda$ satisfying $\lambda(0) = 1$, the value $\lambda_j = 1$ is attainable when $w_j/w_v \to 0$.  Since $\lambda_j = 1$ corresponds to full replacement $m_j' = T_j$, which strengthens rather than weakens consolidation, all downstream results requiring $\lambda_j > 0$ are unaffected.)
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:consolidation}
+See Lean source: \texttt{Core/BlendRateBounds.lean}
+\end{proof}
+
+\begin{lemma}[Lyapunov function for fixed-query consolidation; $\mathcal{A}_+$]
+\label{lem:lyapunov}
+\lean{consolidation_target_closer_than_V}
+\leanok
+\uses{cor:blend_rate_bounds, def:consolidation, lem:stability}
+Let $\varphi \in \mathcal{A}_+$.  Fix a query $q$ and suppose capture is disabled. Let $v = \arg\max_{k \in M} w_k$ where $w = \varphi(qM^\top)$, and $V(t) = \max_{j \neq v} \|m_j - v\|$. Then $V(t+1) < V(t)$ whenever $V(t) > 0$.
+\end{lemma}
+
+\begin{proof}
+\leanok
+\uses{cor:blend_rate_bounds, def:consolidation, lem:stability}
+See Lean source: \texttt{Core/Lyapunov.lean}
+\end{proof}
+
+\begin{corollary}[State-dependent contraction rate; $\mathcal{A}_+$]
+\label{cor:contraction}
+\lean{contractionRate}
+\leanok
+\uses{def:consolidation, lem:lyapunov}
+Under the hypotheses of Lemma~\ref{lem:lyapunov}, let $\alpha_v^{(j)}$ denote the weight that member $j$'s consolidation target places on the anchor $v$. Then
+\[
+V(t+1) \leq (1 - \gamma(t))\,V(t), \qquad \gamma(t) = \min_{j \neq v}\,\lambda_j\bigl(1 - \sqrt{1 - \alpha_v^{(j)}}\bigr).
+\]
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:consolidation, lem:lyapunov}
+See Lean source: \texttt{Core/ContractionRate.lean}
+\end{proof}
+
+\begin{corollary}[Retrieval weight dilution (fan effect); softmax]
+\label{cor:fan}
+\lean{fan_effect}
+\leanok
+\uses{def:retrieval}
+Let $\varphi = \operatorname{softmax}$ and $q$ be fixed. If $M' = M \cup \{m_{\mathrm{new}}\}$ for some $m_{\mathrm{new}} \notin M$, then for every $j \in M$:
+\[
+[\operatorname{softmax}(q\,M'^\top)]_j < [\operatorname{softmax}(q\,M^\top)]_j.
+\]
+In particular, $\max_{j \in M}\,w_j$ is strictly decreasing as $|M|$ grows.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:retrieval}
+See Lean source: \texttt{Core/FanEffect.lean}
+\end{proof}
+
+\begin{corollary}[Retrieval weight bounds; softmax]
+\label{cor:opposition}
+\lean{retrieval_weight_lower_bound}
+\leanok
+Under softmax with $|M| = n$, the maximum retrieval weight for any single impression satisfies $1/n \leq \max_j w_j \leq 1/(1 + (n-1)\exp(-g))$, where $g = \max_j q^\top m_j - \max_{k \neq j} q^\top m_k$ is the score gap. The upper bound requires score gap $g = \Omega(\log n)$ to remain bounded away from zero.
+\end{corollary}
+
+\begin{proof}
+\leanok
+See Lean source: \texttt{Core/RetrievalWeightBounds.lean}
+\end{proof}
+
+\begin{corollary}[Attention budget constraint; $\mathcal{A}$]
+\label{cor:budget}
+\lean{attention_sum_one}
+\leanok
+\uses{def:observation}
+Under any simplex map $\varphi$, $\sum_{\tau \in X} a_t(\tau) = 1$ at every step. For $|X| = n$ elements receiving nonzero attention, $\bar{a} = 1/n$, and increasing $n$ strictly decreases the mean attention per element.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:observation}
+See Lean source: \texttt{Core/AttentionBudget.lean}
+\end{proof}
+
+\begin{corollary}[Convergence under repeated consolidation without capture; $\mathcal{A}_+$]
+\label{cor:sleep}
+\lean{lyapunovV_nonneg}
+\leanok
+\uses{cor:contraction, def:consolidation, lem:hull, lem:lyapunov}
+Let $\varphi$ be a continuous positive simplex map. Suppose capture is disabled and the query $q$ is fixed. Then $V(t) \to 0$: all impressions converge to the anchor $v$.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{cor:contraction, def:consolidation, lem:hull, lem:lyapunov}
+See Lean source: \texttt{Core/Convergence.lean}
+\end{proof}
+
+\begin{corollary}[Vanishing contraction rate; $\mathcal{A}_+$]
+\label{cor:selflimiting}
+\lean{contractionRate_le_sup_blendRate}
+\leanok
+\uses{cor:blend_rate_bounds, cor:contraction, cor:sleep, def:consolidation}
+Under the hypotheses of Corollary~\ref{cor:sleep} (fixed query, no capture), the contraction rate $\gamma(t)$ satisfies $\gamma(t) \to 0$ as $t \to \infty$.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{cor:blend_rate_bounds, cor:contraction, cor:sleep, def:consolidation}
+See Lean source: \texttt{Core/SelfLimiting.lean}
+\end{proof}
+
+\begin{corollary}[Prototype formation; $\mathcal{A}_+$]
+\label{cor:prototype}
+\lean{prototype_formation}
+\leanok
+\uses{cor:sleep, def:consolidation}
+Under the hypotheses of Corollary~\ref{cor:sleep}, as $t \to \infty$ every row of $M$ converges to the anchor $v = \arg\max_{k \in M} q^\top m_k$.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{cor:sleep, def:consolidation}
+See Lean source: \texttt{Core/PrototypeFormation.lean}
+\end{proof}
+
+\begin{corollary}[Context variation prevents convergence to single prototype; $\mathcal{A}_+$]
+\label{cor:variability}
+\lean{context_variation_preserves_diversity}
+\leanok
+\uses{cor:contraction, cor:sleep, def:consolidation}
+Let $\varphi$ be a continuous positive simplex map and $|M| \geq 2$ with at least two distinct impressions.
+Under fixed query $q$, $V(t) \to 0$
+(Corollary~\ref{cor:sleep}).  Let $T_{\mathrm{rot}}$ be the timescale
+on which the query varies (i.e.\ the anchor identity changes), and let
+$\gamma(t) = \min_{j \neq v} \lambda_j(1 - \sqrt{1 - \alpha_v^{(j)}})$
+be the contraction rate (Corollary~\ref{cor:contraction}).  Suppose
+$\gamma_{\min} := \min_{0 \leq t \leq T_{\mathrm{rot}}} \gamma(t) > 0$
+(which holds whenever distinct impressions have distinct scores under
+the query throughout $[0, T_{\mathrm{rot}}]$).  If
+$T_{\mathrm{rot}} < 1/\gamma_{\min}$, the anchor changes
+before $V$ reaches zero, and distinct impressions are preserved.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{cor:contraction, cor:sleep, def:consolidation}
+See Lean source: \texttt{Core/ContextVariation.lean}
+\end{proof}
+
+\begin{corollary}[Hyperbolic decay; $\mathcal{A}$]
+\label{cor:decay}
+\lean{accumulateC_constant_when_attention_zero}
+\leanok
+\uses{def:accumulation}
+If $a_t(\tau) = 0$ for all $t \geq T$, then
+\[
+\sigma_t(\tau) = \frac{C_T(\tau)}{N_0 + t},
+\]
+where $C_T(\tau)$ is the accumulated encoding strength at cessation.  The decay is hyperbolic in $t$ with rate constant determined by the encoding history.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:accumulation}
+See Lean source: \texttt{Core/ForgettingCurve.lean}
+\end{proof}
+
+\begin{remark}[Forgetting curve]
+\label{rem:forgetting}
+\lean{accumulateC_constant_when_attention_zero}
+\leanok
+\uses{def:accumulation}
+Whether the forgetting curve is exponential or hyperbolic was debated for over a century after \citet{ebbinghaus1885}.  \citet{rubin1996} tested 105 functional forms against 210 data sets and found that power-law (hyperbolic) forms consistently fit retention data best.  The loop forces power-law decay, not exponential; this is the distinction debated in the literature.  The specific exponent depends on the mapping from salience to behavioral measurement, which is outside the object.  The power-law form itself is forced by the self-damping rigidity (Proposition~\ref{prop:rigidity}).
+\end{remark}
+
+\begin{proposition}[Optimal spacing interval; $\mathcal{A}$]
+\label{prop:spacing}
+\lean{massed_accumulation_bound}
+\leanok
+\uses{def:accumulation}
+Fix $n \geq 2$ observations of element $\tau$ at intensity $\delta > 0$, spaced $K$ steps apart (observations at $t = 0, K, 2K, \ldots, (n-1)K$), and fix a retention interval $R \geq 1$ after the last observation.  The salience at evaluation time $T = (n-1)K + R$ is
+\[
+\sigma(K) = \frac{\sqrt{C_0^2 + \delta K\,n(n-1) + 2\delta n}}{N_0 + (n-1)K + R}.
+\]
+For large $n$ and $K$, $\sigma(K) \approx n\sqrt{\delta K}/((n-1)K + R)$, which is maximized at
+\[
+K^* = \frac{R}{n - 1}.
+\]
+The benefit curve is an inverted $U$: $\sigma$ increases for $K < K^*$ and decreases for $K > K^*$.
+\end{proposition}
+
+\begin{proof}
+\leanok
+\uses{def:accumulation}
+See Lean source: \texttt{Core/SpacingEffect.lean}
+\end{proof}
+
+\begin{corollary}[Optimal spacing scales with retention interval; $\mathcal{A}$]
+\label{cor:cepeda}
+\lean{massed_accumulation_bound}
+\leanok
+\uses{def:accumulation}
+The optimal inter-study interval $K^* = R/(n-1)$ is linearly increasing in the retention interval $R$.  Longer retention requires wider spacing.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:accumulation}
+See Lean source: \texttt{Core/SpacingEffect.lean}
+\end{proof}
+
+\begin{remark}[Spacing effect]
+\label{rem:spacing}
+\lean{massed_accumulation_bound}
+\leanok
+\uses{def:accumulation}
+\citet{cepeda2006} found in a meta-analysis of 317 experiments that the optimal inter-study interval increases with the retention interval, and that the benefit of spacing over massing follows an inverted-$U$ curve.  The loop produces both the inverted $U$ and the linear scaling $K^* \propto R$ from the accumulation rule alone; both are forced by the accumulation rigidity (Proposition~\ref{prop:rigidity}).
+\end{remark}
+
+\begin{corollary}[Selective preservation under retrieval; $\mathcal{A}_+$]
+\label{cor:testing}
+\lean{testing_effect}
+\leanok
+\uses{cor:blend_rate_bounds}
+Let $\varphi$ be a positive simplex map with $|M| \geq 2$ and distinct impressions.  Retrieval of the anchor $v = \arg\max_k w_k$ preserves $v$ exactly ($\lambda_v = 0$) and displaces every competitor: $\lambda_j > 0$ for all $j \neq v$.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{cor:blend_rate_bounds}
+See Lean source: \texttt{Core/TestingEffect.lean}
+\end{proof}
+
+\begin{remark}[Testing effect]
+\label{rem:testing}
+\lean{testing_effect}
+\leanok
+\uses{cor:blend_rate_bounds}
+\citet{roediger2006} demonstrated that actively retrieving information produces better long-term retention than passive re-study.  In the loop, retrieval and consolidation share the same weight vector $w = \varphi(qM^\top)$: the act of retrieval is the act of selective preservation.  The boundary condition $\lambda(1) = 0$ that makes this work is forced (Proposition~\ref{prop:consolidation_rigidity}).
+\end{remark}
+
+\begin{corollary}[Retrieval advantage grows with delay; $\mathcal{A}_+$]
+\label{cor:crossover}
+\lean{retrieval_crossover}
+\leanok
+\uses{cor:decay, cor:testing, lem:lyapunov}
+Compare two interventions at time $T$: (a) re-observation of element $\tau$, and (b) retrieval of impression $v$ with $\tau$ as the anchor.
+\begin{enumerate}
+\item Re-observation increases $C(\tau)$ by at most $1$, so the salience gain is $\Delta\sigma \leq 1/(N_0 + T)$, which decays as $O(1/t)$ at evaluation time $t > T$.
+\item Retrieval contracts the Lyapunov function: $V' < V$ (Lemma~\ref{lem:lyapunov}).  The contraction is permanent and independent of the evaluation delay.
+\end{enumerate}
+At sufficiently long delays, the permanent contraction dominates the transient salience boost.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{cor:decay, cor:testing, lem:lyapunov}
+See Lean source: \texttt{Core/RetrievalCrossover.lean}
+\end{proof}
+
+\begin{remark}[Crossover]
+\label{rem:crossover}
+\lean{retrieval_crossover}
+\leanok
+\uses{cor:crossover}
+\citet{roediger2006} found that retrieval practice underperforms re-study at short delays but overtakes it at longer delays.  The loop produces this crossover: re-study boosts $\sigma$ (transient, $O(1/t)$); retrieval contracts $V$ (permanent).
+\end{remark}
+
+\chapter{Sleep Dynamics}\label{ch:sleep}
+
+\begin{theorem}[Retrieval degradation under sustained waking; softmax]
+\label{thm:sleep_pressure}
+\lean{sleep_pressure_fan_effect}
+\leanok
+\uses{def:consolidation, def:retrieval}
+Let $\varphi = \operatorname{softmax}$ and let the system operate with both capture and consolidation enabled.  Let $R = \max_{\tau \in X}\|E(\tau)\|$ and $\|K\|_{\mathrm{op}} \leq 1$.  Then:
+\begin{enumerate}
+\item Every capture event strictly decreases all existing retrieval weights: if $M' = M \cup \{m_{\mathrm{new}}\}$, then $[\operatorname{softmax}(qM'^\top)]_j < [\operatorname{softmax}(qM^\top)]_j$ for all $j \in M$.
+\item The score gap required for a single impression to achieve retrieval weight $w_v \geq c > 0$ is $g \geq \log((|M| - 1)c/(1-c))$, i.e.\ $g = \Omega(\log |M|)$.
+\item The achievable score gap is uniformly bounded: $g \leq 2R^2$.
+\item There exists a critical memory size
+\[
+|M^*| = 1 + \frac{1-c}{c}\exp(2R^2)
+\]
+beyond which no single impression can achieve retrieval weight $w_v \geq c$ for any query.
+\item Waking consolidation cannot prevent this degradation: the self-limiting property $\gamma(t) \to 0$ as impressions equalize (Corollary~\ref{cor:selflimiting}) means consolidation decelerates precisely when it is most needed.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\leanok
+\uses{def:consolidation, def:retrieval}
+See Lean source: \texttt{Sleep/RetrievalDegradation.lean}
+\end{proof}
+
+\begin{remark}[Sleep pressure is a capacity phenomenon]
+\label{rem:sleep_pressure}
+\lean{sleep_pressure_fan_effect}
+\leanok
+\uses{def:consolidation, def:retrieval}
+The degradation in Theorem~\ref{thm:sleep_pressure} is not caused by any single mechanism but by the interaction of three: (1)~capture grows $|M|$ monotonically; (2)~the fan effect (Corollary~\ref{cor:fan}) dilutes all weights at each capture event; (3)~the bounded score gap prevents the system from overcoming the dilution.  The bound $|M^*|$ is the carrying capacity of the retrieval mechanism under a given embedding.  For unit-norm embeddings ($R = 1$), $|M^*| = 1 + ((1-c)/c)e^2$; at $c = 0.5$ (the majority retrieval threshold: the anchor outweighs all competitors combined) this gives $|M^*| = 1 + e^2 \approx 8.4$.  The memory $M$ is not defined as any particular type of memory; it is simply the variable-size store of the loop.  The capacity limit $7 \pm 2$ documented by \citet{miller1956} falls in the same range.  For small $c$, $|M^*| = 1 + ((1-c)/c)e^2 = e^2/c - (e^2 - 1) \leq e^2/c$.
+\end{remark}
+
+\begin{theorem}[Sleep restores retrieval precision; $\mathcal{A}_+$]
+\label{thm:sleep_efficacy}
+\lean{sleep_efficacy_V_decreasing}
+\leanok
+\uses{cor:selflimiting, cor:sleep, def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval}
+Let the system enter a ``sleep phase'': $S = 0$ with capture disabled.  Let $\varphi$ be a continuous positive simplex map, $|M| \geq 2$.  Then:
+\begin{enumerate}
+\item $V(t)$ is strictly decreasing: $V(t+1) < V(t)$ whenever $V(t) > 0$, and $V(t) \to 0$.
+\item Consolidation reduces the effective memory size through prototype formation: if $\|m_i - m_j\| < \epsilon$ for impressions $i, j$ after consolidation, they are functionally merged (their retrieval weights under any query differ by at most $\|q\|\epsilon$).
+\item After sleep, the effective number of distinguishable impressions decreases.  If $M$ has consolidated into $p$ clusters of diameter $< \epsilon$ separated by inter-cluster gap $g_p > 0$, then under any $\varphi \in \mathcal{A}_+$, the anchor weight $w_v$ increases as $p$ decreases (fewer competitors) and $g_p$ increases (sharper discrimination).  Under softmax with inverse temperature $\beta > 0$ (where $\beta = 1$ in the standard form of Definition~\ref{def:retrieval}), $w_v \geq 1/(1 + (p-1)\exp(-\beta g_p))$.  Since $p \leq |M|$ and consolidation reduces $p$, sleep improves retrieval concentration.
+\item The contraction rate $\gamma(t) \to 0$ provides a natural termination condition for sleep.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\leanok
+\uses{cor:selflimiting, cor:sleep, def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval}
+See Lean source: \texttt{Sleep/SleepEfficacy.lean}
+\end{proof}
+
+\begin{theorem}[Monotonicity of sleep pressure; softmax]
+\label{thm:monotone_pressure}
+\lean{retrievalPrecisionBound}
+\leanok
+\uses{def:retrieval}
+During sustained waking (capture and consolidation both enabled), the retrieval degradation described by Theorem~\ref{thm:sleep_pressure} is monotone and irreversible:
+\begin{enumerate}
+\item $C_t(\tau)$ is non-decreasing for all $\tau \in X$.
+\item $N_t(\tau) = N_0 + t$ is strictly increasing.
+\item $|M_t|$ is non-decreasing, and strictly increasing whenever a capture event occurs.
+\item The retrieval precision bound $\rho(|M|) := \max_{g \leq 2R^2} [1/(1 + (|M|-1)\exp(-g))]$ is monotone decreasing in $|M|$.
+\item Therefore the system's retrieval capacity is non-increasing during waking, and strictly decreasing at every capture event. No operation internal to the waking dynamics can reverse this.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\leanok
+\uses{def:retrieval}
+See Lean source: \texttt{Sleep/MonotonePressure.lean}
+\end{proof}
+
+\begin{corollary}[Irreversibility during waking; softmax]
+\label{cor:irreversible}
+\lean{irreversibility_during_waking}
+\leanok
+\uses{thm:monotone_pressure}
+Let $t_1 < t_2$ be two time steps during a waking phase with $|M_{t_2}| > |M_{t_1}|$.  Then the retrieval precision bound satisfies $\rho(|M_{t_2}|) < \rho(|M_{t_1}|)$.  No sequence of waking operations can restore $\rho$ to its value at $t_1$.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{thm:monotone_pressure}
+See Lean source: \texttt{Sleep/Irreversibility.lean}
+\end{proof}
+
+\begin{theorem}[Quasi-fixed-point under $S = 0$; $\mathcal{A}_+$]
+\label{thm:wakeup}
+\lean{wakeup_V_converges}
+\leanok
+\uses{def:consolidation, def:retrieval}
+Let $\varphi$ be a continuous positive simplex map.  Under $S = 0$ with capture disabled and $|M| \geq 2$, the system reaches a quasi-fixed point characterized by:
+\begin{enumerate}
+\item $V(t) \to 0$: all impressions converge to prototypes.
+\item $\gamma(t) \to 0$: the contraction rate vanishes (self-limiting).
+\item $\ell(t) \to v$: the retrieval output stabilizes to the anchor.
+\item $b(t) \to EKv$: the retrieval bias stabilizes.
+\item The attention distribution converges to $a^* = \varphi(\sigma^* + EKv)$ satisfying the self-consistent equation
+\[
+a^* = \varphi\!\left(\frac{C^*}{N} + EKv\right)
+\]
+where $C^*$ is the accumulation state at convergence and $v = \lim_{t \to \infty} \ell(t)$.  The existence of $a^*$ follows from the Brouwer fixed-point theorem applied to the continuous map $a \mapsto \varphi(\sigma(C(a)) + EKv)$ on the compact convex set $\Delta^{|X|}$.
+\item The vanishing of $\gamma$ is a detectable wake-up signal: for any tolerance $\epsilon > 0$, there exists $T$ such that $\gamma(t) < \epsilon$ for all $t \geq T$, and further $S = 0$ steps produce change bounded by $\epsilon\,V(T)$ in a single step.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\leanok
+\uses{def:consolidation, def:retrieval}
+See Lean source: \texttt{Sleep/Wakeup.lean}
+\end{proof}
+
+\begin{theorem}[Self-observable sleep pressure; softmax]
+\label{thm:self_observable}
+\lean{self_observable_computable}
+\leanok
+\uses{cor:contraction, def:consolidation, def:retrieval}
+The system can detect its own need for sleep from quantities computable at each step without access to any external oracle.  Define:
+\begin{enumerate}
+\item The \emph{retrieval concentration} $\rho_t := \max_j w_j^{(t)}$, the maximum retrieval weight at step $t$.
+\item The \emph{consolidation capacity} $\gamma_t := \min_{j \neq v}\lambda_j(1 - \sqrt{1 - \alpha_v^{(j)}})$, the contraction rate at step $t$.
+\item The \emph{memory load} $\mu_t := |M_t|$, the number of rows in $M$ at step $t$.
+\end{enumerate}
+Then:
+\begin{enumerate}
+\item All three quantities are computable from the current state $(M_t, w_t, q_t)$ alone, requiring no history, no external threshold, and no knowledge of $|M^*|$.
+\item The retrieval concentration $\rho_t$ is non-increasing at every capture event (by the fan effect, Corollary~\ref{cor:fan}).  It satisfies
+\[
+\rho_t \leq \frac{1}{1 + (\mu_t - 1)\exp(-2R^2)},
+\]
+which is a computable upper bound that depends only on $\mu_t$ and the embedding radius $R$.
+\item The consolidation capacity $\gamma_t \to 0$ as $\rho_t \to 1/\mu_t$ (by Corollary~\ref{cor:selflimiting}).  The system can detect this: when $\gamma_t < \epsilon$ for any chosen $\epsilon > 0$, each consolidation step changes $V$ by less than $\epsilon\,V(t)$.
+\item The joint condition
+\[
+\rho_t < c \quad \text{and} \quad \gamma_t < \epsilon
+\]
+for any thresholds $c, \epsilon > 0$ constitutes a \emph{sufficient condition for sleep}: retrieval is degraded (below concentration $c$) and consolidation cannot self-repair (rate below $\epsilon$).  Both conditions are monotone during waking: once triggered, they remain triggered until an $S = 0$ phase intervenes.
+\item Under $S = 0$ with capture disabled, both conditions reverse: $\gamma_t$ initially increases (consolidation resumes with a stable query) and, after prototype formation reduces the effective $\mu$, $\rho_t$ recovers.  The system can detect the completion of sleep by monitoring $\gamma_t \to 0$ again (Theorem~\ref{thm:wakeup}(vi)).
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\leanok
+\uses{cor:contraction, def:consolidation, def:retrieval}
+See Lean source: \texttt{Sleep/SelfObservable.lean}
+\end{proof}
+
+\begin{corollary}[Sleep--wake cycle from internal observables; softmax]
+\label{cor:sleep_wake_cycle}
+\lean{sleepOnsetCondition}
+\leanok
+The pair $(\rho_t, \gamma_t)$ defines a complete sleep--wake control signal:
+\begin{itemize}
+\item \textbf{Sleep onset:} $\rho_t < c$ and $\gamma_t < \epsilon$ (degraded retrieval, stalled consolidation).
+\item \textbf{Sleep completion:} $\gamma_t < \epsilon$ and $\rho_t > c'$ for some recovery threshold $c' > c$ (recovered retrieval, completed consolidation).
+\end{itemize}
+The thresholds $c, c', \epsilon$ are not tunable parameters of the dynamics; they are consequences of the embedding geometry ($R$, $|X|$, $d$) and can be derived from the bounds in Theorems~\ref{thm:sleep_pressure} and~\ref{thm:sleep_efficacy}.  In particular, $c$ can be set to $\rho(|M^*|) = 1/(1 + (|M^*| - 1)\exp(-2R^2))$, which is the retrieval concentration at the critical memory size, and $\epsilon$ can be set to any value below the initial waking contraction rate $\gamma_0$.
+\end{corollary}
+
+\begin{proof}
+\leanok
+See Lean source: \texttt{Sleep/SleepWakeCycle.lean}
+\end{proof}
+
+\begin{remark}[Two regimes of vanishing $\gamma$]
+\label{rem:two_gamma_regimes}
+\lean{sleepOnsetCondition}
+\leanok
+The contraction rate $\gamma$ vanishes for two opposite reasons: exhaustion (weights equalize, $\rho \to 1/|M|$) and completion (impressions converge, $\rho \to 1$).  The pair $(\rho, \gamma)$ separates them, and the sleep phase is the trajectory from one to the other in $(\rho, \gamma)$ space.
+\end{remark}
+
+\begin{definition}[$\epsilon$-clusters under a query]
+\label{def:cluster}
+\lean{interClusterSep}
+\leanok
+Let $q$ be a query and $M$ a memory matrix.  Two impressions $m_i, m_j \in M$ are \emph{$\epsilon$-near under $q$} if $|q^\top m_i - q^\top m_j| < \epsilon$.  The \emph{$\epsilon$-clusters of $M$ under $q$} are the connected components of the graph on $M$ where $m_i \sim m_j$ iff $\|m_i - m_j\| < \epsilon$.  Denote the clusters $\mathcal{C}_1, \ldots, \mathcal{C}_p$ with $M = \bigsqcup_{k=1}^p \mathcal{C}_k$.  We say the clusters are \emph{well-separated} if $\min_{k \neq k'}\min_{m \in \mathcal{C}_k, m' \in \mathcal{C}_{k'}} \|m - m'\| > 2\epsilon$.
+\end{definition}
+
+\begin{definition}[Cluster salience]
+\label{def:cluster_salience}
+\lean{interClusterSep}
+\leanok
+Given clusters $\mathcal{C}_1, \ldots, \mathcal{C}_p$ of $M$ under query $q$, the \emph{cluster score spread} of $\mathcal{C}_k$ is
+\[
+\Delta_k(q) = \max_{m \in \mathcal{C}_k} q^\top m - \min_{m \in \mathcal{C}_k} q^\top m,
+\]
+and the \emph{cluster retrieval mass} is $W_k = \sum_{m_j \in \mathcal{C}_k} w_j$ where $w = \varphi(qM^\top)$.  The \emph{anchor cluster} is the cluster $\mathcal{C}_{k^*}$ containing the anchor $v = \arg\max_j w_j$.
+\end{definition}
+
+\begin{theorem}[Sleep cycle oscillation from multi-cluster consolidation; $\mathcal{A}_+$]
+\label{thm:oscillation}
+\lean{oscillation_localization}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval}
+Let $\varphi$ be a continuous positive simplex map.  Suppose the system enters an $S = 0$ phase with capture disabled and $|M| \geq 2$.  Let $M$ contain $p \geq 2$ well-separated $\epsilon$-clusters $\mathcal{C}_1, \ldots, \mathcal{C}_p$ (Definition~\ref{def:cluster}) under the initial query $q_0$.  Then:
+\begin{enumerate}
+\item \textbf{Consolidation localizes to the anchor cluster.}  At each step, the anchor $v = \arg\max_j w_j$ lies in some cluster $\mathcal{C}_{k^*}$.  Impressions $m_j \in \mathcal{C}_{k^*}$ have blend rates bounded (under softmax with inverse temperature $\beta$) by $\lambda_j \leq 1 - e^{-\beta\|q\|\epsilon}$ (since $w_j/w_v \geq e^{-\beta\|q\|\epsilon}$) and experience non-zero \emph{displacement} because the consolidation target differs from $m_j$ (here $\ell = wM$ for brevity; more precisely, the per-impression target $T_j$ of Definition~\ref{def:consolidation} pulls toward the anchor, producing net contraction within the cluster).  Impressions in other clusters $\mathcal{C}_{k}, k \neq k^*$, have blend rates bounded below (under softmax) by $\lambda_j \geq 1 - e^{-\beta\,g_{k^*,k}}$ (since $w_j/w_v \leq e^{-\beta\,g_{k^*,k}}$ where $g_{k^*,k} > 0$ is the inter-cluster score gap) but experience displacement that varies by at most $O(\epsilon)$ within each cluster: all members of $\mathcal{C}_k$ are within $\epsilon$ of each other and all distant from $\ell$, so their pairwise displacements differ by at most $O(\epsilon)$ and the intra-cluster structure is preserved up to $O(\epsilon)$.  Consolidation therefore primarily compresses $\mathcal{C}_{k^*}$ while perturbing the intra-cluster spread of other clusters by at most $O(\epsilon)$ per step.
+
+\item \textbf{Anchor rotation upon cluster convergence.}  As $\mathcal{C}_{k^*}$ converges internally (all $m_j \in \mathcal{C}_{k^*}$ approach the anchor $v$), the intra-cluster score spread $\Delta_{k^*}(q) \to 0$, the retrieval weights within $\mathcal{C}_{k^*}$ equalize, and $\gamma(t) \to 0$ for that cluster.  At this point, the dominant contribution to the overall score spread $\Delta_\sigma(t)$ comes from some unconsolidated cluster $\mathcal{C}_{k'}$.  The query shifts to reflect $\mathcal{C}_{k'}$'s structure (since $\ell = wM$ changes as the weight distribution evolves), and the anchor rotates to $\mathcal{C}_{k'}$.  The Lyapunov function $V$ measured from the new anchor spikes: $V$ increases because $\|v_{\mathrm{old}} - v_{\mathrm{new}}\| > 0$ (well-separation), and correspondingly $\gamma$ recovers to a positive value.
+
+\item \textbf{Oscillatory $\gamma$ trajectory.}  The contraction rate $\gamma(t)$ exhibits an oscillatory pattern: for each cluster consolidation episode, $\gamma$ starts positive (when the anchor first engages the cluster), decays toward zero as the cluster converges (Corollary~\ref{cor:selflimiting}), then spikes when the anchor rotates to the next cluster.  The number of such decay-then-spike episodes is at most $p - 1$ (after which all clusters are consolidated and $\gamma \to 0$ permanently).
+
+\item \textbf{Bounded number of oscillation cycles.}  The total number of anchor-cluster transitions is at most $p - 1$.  Each transition eliminates one cluster from the set of unconsolidated clusters (the converged cluster satisfies $\Delta_k \to 0$, so its impressions contribute score spread at most $\|q\|\Delta_k \to 0$).  Therefore the oscillation terminates after at most $p - 1$ transitions.
+
+\item \textbf{Salience ordering of consolidation.}  The first anchor cluster $\mathcal{C}_{k^*_1}$ is the one whose anchor $v$ maximizes $q_0^\top v$ (highest-scoring under the initial query), so the most salient cluster under $q_0$ is consolidated first.  For subsequent episodes, the anchor is the argmax among remaining unconsolidated impressions under the query at that transition point: the next anchor cluster $\mathcal{C}_{k^*_2}$ has the largest retrieval mass among remaining clusters under the post-convergence query, and so on.  The sequential structure is preserved (each transition selects the most salient remaining cluster), but the ordering may differ from the initial salience ranking under $q_0$ because the query evolves as each cluster consolidates.
+
+\item \textbf{Termination recovers Theorem~\ref{thm:wakeup}.}  After all $p$ clusters have converged, the system satisfies $\gamma(t) \to 0$ with $V(t) \to 0$, recovering the quasi-fixed-point condition of Theorem~\ref{thm:wakeup}.  The terminal state consists of $p$ prototypes (one per original cluster), with the system at rest.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval}
+See Lean source: \texttt{Sleep/Oscillation.lean}
+\end{proof}
+
+\begin{remark}[Oscillation as sequential single-cluster episodes]
+\label{rem:oscillation_episodes}
+\lean{oscillation_localization}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval}
+The multi-cluster sleep phase is a sequence of single-cluster episodes, each governed by the same Lyapunov descent and self-limiting property as Theorem~\ref{thm:sleep_efficacy}; the only new element is the inter-episode anchor rotation.  The number of oscillation cycles equals the number of distinct clusters at sleep onset.
+\end{remark}
+
+\begin{remark}[Inter-cluster displacement during consolidation]
+\label{rem:inter_cluster_displacement}
+\lean{oscillation_localization}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval}
+Theorem~\ref{thm:oscillation}(i) shows that the \emph{intra}-cluster structure of non-anchor clusters is preserved up to $O(\epsilon)$ per step.  However, the \emph{inter}-cluster distance is not preserved: each non-anchor cluster $\mathcal{C}_k$ is displaced toward the retrieval target $\ell \approx v$ at each consolidation step.
+
+Under the global-target simplification (each row blends toward $\ell = wM$ rather than the per-impression target $T_j$ of Definition~\ref{def:consolidation}), a non-anchor impression $m_j \in \mathcal{C}_k$ with weight ratio $r_j = w_j/w_v \leq e^{-\beta g_{k^*,k}}$ has blend rate $\lambda_j = 1 - r_j \geq 1 - e^{-\beta g_{k^*,k}}$, and the per-step update gives
+\[
+\|m_j^{(t+1)} - v\| \;\leq\; e^{-\beta g_{k^*,k}}\,\|m_j^{(t)} - v\| + O(\epsilon),
+\]
+since $\|\ell - v\| = O(\epsilon)$ when the anchor cluster dominates the retrieval mass ($W_{k^*} \to 1$ for large $\beta g_{k^*,k}$).  Under the per-impression target, the bound $\|T_j - v\| \leq V(t)$ from Lemma~\ref{lem:lyapunov} gives a weaker but qualitatively identical estimate: non-anchor clusters are displaced toward $v$ at each step.  Iterating the global-target bound over $T$ steps and summing the geometric series:
+\[
+\|c_k^{(T)} - v\| \;\leq\; e^{-\beta g_{k^*,k}\,T}\,\|c_k^{(0)} - v\| + \frac{\epsilon}{1 - e^{-\beta g_{k^*,k}}}.
+\]
+After the anchor cluster converges (requiring $T_{k^*} = O(\log(\Delta_{k^*}/\delta)/\gamma_{k^*})$ steps), the inter-cluster distance has shrunk by a factor of approximately $e^{-\beta g_{k^*,k}\,T_{k^*}}$.  This factor is positive (the clusters never fully merge in finite time) but may be exponentially small when $\beta g_{k^*,k}\,T_{k^*}$ is large.
+
+This displacement follows from the blend rule: $\lambda(r) = 1 - r$ applies maximal blending to low-weight impressions.  The oscillation dynamics (anchor rotation, Lyapunov descent, self-limiting) proceed identically regardless of the displacement; it affects the \emph{magnitude} of the post-sleep retrieval improvement but not the \emph{existence} of recovery (Theorem~\ref{thm:sleep_efficacy}(iii)).  Empirically, inter-centroid ratios of $0.001$--$0.08$ are typical over $500$ consolidation steps with $\beta = 1$ (see the simulation \texttt{sim\_cluster\_separation.py}).
+\end{remark}
+
+\begin{corollary}[Sleep duration scales with cluster count; $\mathcal{A}_+$]
+\label{cor:sleep_duration}
+\lean{clusterConvergenceTime}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:inter_cluster_sep}
+Under the hypotheses of Theorem~\ref{thm:oscillation}, the total number of consolidation steps required for all clusters to converge to within tolerance $\delta$ scales as $\sum_{k=1}^{p} T_k$ where $T_k = O(\log(V_k(0)/\delta) / \gamma_k)$ is the convergence time for cluster $\mathcal{C}_k$ with initial intra-cluster Lyapunov value $V_k(0)$ and characteristic contraction rate $\gamma_k$ (a lower bound on the contraction rate during the effective phase of episode $k$, i.e.\ before $\gamma$ drops below threshold; the $O(\log/\gamma)$ bound is therefore conservative).  In particular, sleep duration is at least proportional to the number of initial clusters $p$.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:inter_cluster_sep}
+See Lean source: \texttt{Sleep/SleepDuration.lean}
+\end{proof}
+
+\begin{definition}[Inter-cluster separation parameter]
+\label{def:inter_cluster_sep}
+\lean{interClusterSep}
+\leanok
+Given a memory $M$ with well-separated $\epsilon$-clusters $\mathcal{C}_1, \ldots, \mathcal{C}_p$ (Definition~\ref{def:cluster}) at sleep onset, the \emph{inter-cluster separation} is
+\[
+\epsilon_{\mathrm{sep}} \;=\; \min_{k \neq k'}\;\min_{m \in \mathcal{C}_k,\, m' \in \mathcal{C}_{k'}}\;\|m - m'\|.
+\]
+By the well-separation condition, $\epsilon_{\mathrm{sep}} > 2\epsilon$.  After full consolidation, the inter-prototype distance may be smaller than $\epsilon_{\mathrm{sep}}$ (Remark~\ref{rem:inter_cluster_displacement}); in the sleep debt analysis below, $\epsilon_{\mathrm{sep}}$ refers to the separation at the \emph{current} sleep onset, which is the operationally relevant quantity.
+\end{definition}
+
+\begin{definition}[Sleep debt]
+\label{def:sleep_debt}
+\lean{sleepDebt}
+\leanok
+Let the system enter sleep (capture disabled, $S = 0$) at time $t_0$ with $|M| \geq 2$.  After $k$ consolidation steps, define the \emph{sleep debt} as
+\[
+D(k) \;=\; V(t_0 + k) \;+\; p(t_0 + k),
+\]
+where $V(t_0 + k) = \max_{j \neq v}\|m_j^{(t_0+k)} - v\|$ is the Lyapunov value (Definition~\ref{def:retrieval} and Lemma~\ref{lem:lyapunov}) and $p(t_0 + k)$ is the number of $\epsilon$-clusters of $M_{t_0+k}$ that have not yet converged to within tolerance $\delta$, i.e.\ $p(t_0+k) = |\{k' : \Delta_{k'}(q) > \delta\}|$ where $\Delta_{k'}$ is the intra-cluster score spread (Definition~\ref{def:cluster_salience}).  After full convergence ($k = k_{\mathrm{full}}$), $V \to 0$ and $p_{\mathrm{remaining}} = 0$, so $D(k_{\mathrm{full}}) \to 0$.
+\end{definition}
+
+\begin{theorem}[Sleep debt: compounding, threshold, and recovery; $\mathcal{A}_+$]
+\label{thm:sleep_debt}
+\lean{contractionFactor}
+\leanok
+\uses{def:nap, def:sleep_debt, def:transition}
+Let $\varphi$ be a continuous positive simplex map and let the system alternate between waking phases (capture and consolidation both active, each producing at most $n_{\mathrm{cap}}$ new captures) and sleep phases (capture disabled, $S = 0$, each running for $k$ consolidation steps).  Let $\gamma_{\min} > 0$ be a lower bound on the contraction rate during the effective phase of each sleep episode (bounded away from zero by Corollary~\ref{cor:contraction} while intra-cluster spread satisfies $\Delta_k > 0$).  Then:
+\begin{enumerate}
+
+\item \textbf{Partial sleep is monotonically beneficial.}  For any $0 \leq k_1 < k_2$, we have $V(t_0 + k_2) \leq V(t_0 + k_1)$.  In particular, $V(t_0 + k) \leq (1 - \gamma_{\min})^{k}\,V(t_0)$, so every additional sleep step reduces $V$ by at least a factor of $(1 - \gamma_{\min})$.  The benefit is monotone in sleep duration: more steps $\implies$ lower debt.  (Note: the retrieval concentration $\rho$ over the raw row set may \emph{decrease} transiently during consolidation as non-anchor scores equalize toward the anchor score, shrinking the score gap; $\rho$ recovers only after sufficient convergence reduces the effective memory size via prototype formation, as described in Theorem~\ref{thm:self_observable}(e).)
+
+\item \textbf{Debt compounds across cycles.}  Suppose the system undergoes $n$ wake--sleep cycles, where each waking phase adds at most $\Delta V > 0$ to the Lyapunov value ($\Delta V$ is an upper bound on the per-cycle Lyapunov increment) and each sleep phase runs for $k_{\mathrm{short}}$ steps.  Let $r = (1 - \gamma_{\min})^{k_{\mathrm{short}}} \in (0,1)$ be the per-cycle contraction factor.  Then the residual Lyapunov value at the start of the $(n+1)$-th waking phase satisfies
+\[
+V_n \;\leq\; r\,(V_{n-1} + \Delta V) \;\leq\; \frac{r\,\Delta V}{1 - r} + r^n\!\left(V_0 - \frac{r\,\Delta V}{1 - r}\right),
+\]
+which converges to the steady-state residual
+\[
+V_{\infty} \;=\; \frac{r\,\Delta V}{1 - r} \;=\; \frac{(1 - \gamma_{\min})^{k_{\mathrm{short}}}\,\Delta V}{1 - (1 - \gamma_{\min})^{k_{\mathrm{short}}}}.
+\]
+As $k_{\mathrm{short}} \to 0$, $r \to 1$ and $V_{\infty} = r\,\Delta V/(1-r) \to \infty$: the system carries permanent residual debt that grows without bound as sleep is curtailed.
+
+\item \textbf{Critical debt threshold.}  There exists a critical sleep duration $k_{\mathrm{crit}}$ below which the per-cycle residual grows unboundedly.  Specifically, the residual $V_n$ is bounded (i.e.\ the geometric series in~(ii) converges) if and only if $r < 1$, which always holds for $k_{\mathrm{short}} \geq 1$.  However, for the system to maintain functional retrieval, we need $V_{\infty}$ below the inter-cluster separation $\epsilon_{\mathrm{sep}}$ (otherwise unconsolidated impressions from different clusters mix, destroying cluster structure).  The critical duration is
+\[
+k_{\mathrm{crit}} \;=\; \left\lceil\frac{\log\!\bigl(\epsilon_{\mathrm{sep}} / (\Delta V + \epsilon_{\mathrm{sep}})\bigr)}{\log(1 - \gamma_{\min})}\right\rceil.
+\]
+For $k_{\mathrm{short}} < k_{\mathrm{crit}}$, the steady-state residual exceeds $\epsilon_{\mathrm{sep}}$ and the system is in \emph{permanent degradation}: each cycle's new captures are added on top of an unconsolidated residual that prevents clean cluster formation.
+
+\item \textbf{Recovery from debt.}  A single full-length sleep phase of $k_{\mathrm{full}} \geq \lceil \log(V_n / \delta) / (-\log(1 - \gamma_{\min}))\rceil$ steps reduces $V$ to within tolerance $\delta$ of zero, regardless of the accumulated debt $V_n$.  After recovery, $D(k_{\mathrm{full}}) \leq \delta$ and the system satisfies the quasi-fixed-point condition of Theorem~\ref{thm:wakeup}: $V \leq \delta$, $\gamma \to 0$, $\ell \to v$, $b \to EKv$.
+
+\item \textbf{Full sleep dominates truncated sleep.}  Let $V_n^{\mathrm{full}}$ and $V_n^{\mathrm{short}}$ denote the residual at the start of the $(n+1)$-th waking phase under full and truncated sleep respectively, starting from the same initial condition.  Then $V_n^{\mathrm{full}} \leq V_n^{\mathrm{short}}$ for all $n$, with strict inequality whenever $V_{n-1}^{\mathrm{short}} > 0$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\leanok
+\uses{def:nap, def:sleep_debt, def:transition}
+See Lean source: \texttt{Sleep/SleepDebtThm.lean}
+\end{proof}
+
+\begin{remark}[Sleep debt as a mathematical property]
+\label{rem:sleep_debt}
+\lean{contractionFactor}
+\leanok
+\uses{def:nap, def:sleep_debt, def:transition}
+The steady-state residual $V_\infty = r\,\Delta V/(1-r)$ depends on a single dimensionless ratio: how much the system captures per cycle ($\Delta V$) versus how much it consolidates ($1-r$, which encodes both $\gamma_{\min}$ and $k_{\mathrm{short}}$).  Recovery is logarithmic in the accumulated debt, not linear: doubling $V_n$ costs only $\log 2/\gamma_{\min}$ extra steps, so there is no need for cumulative ``make-up'' time.  The compounding formula and logarithmic recovery parallel the empirical dose-response relationship between chronic sleep restriction and cognitive deficits \citep{vandongen2003}.
+\end{remark}
+
+\begin{corollary}[Sleep debt is self-observable; softmax]
+\label{cor:debt_observable}
+\lean{debt_observable}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:inter_cluster_sep, def:nap, def:sleep_debt, def:transition}
+The sleep debt $D(k) = V(t_0+k) + p(t_0+k)$ is computable from the current state $(M, w, q)$ at any point during sleep or waking:
+\begin{itemize}
+\item $V$ is computed from $M$ and $w$ as $V = \max_{j \neq v}\|m_j - v\|$ where $v = \arg\max_j w_j$.
+\item The cluster count $p$ is the number of $\epsilon$-clusters of $M$ with intra-cluster spread exceeding $\delta$ (Definition~\ref{def:cluster}).
+\end{itemize}
+The system can therefore monitor its own debt level and determine whether further sleep is needed, extending Theorem~\ref{thm:self_observable} to the multi-cycle setting.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:inter_cluster_sep, def:nap, def:sleep_debt, def:transition}
+See Lean source: \texttt{Sleep/DebtObservable.lean}
+\end{proof}
+
+\begin{theorem}[Transient sharpening without consolidation; softmax]
+\label{thm:score_boost}
+\lean{score_boost_retrieval_irrelevant}
+\leanok
+\uses{def:retrieval}
+Let $\varphi = \operatorname{softmax}$ with inverse temperature $\beta$ in the observation step (step~1, OBSERVE) and fixed inverse temperature $\beta_r$ in the retrieval step (step~3, RETRIEVE).  Consider two interventions: (a)~a selective boost to observation scores that increases the observation score gap by some $\delta' > 0$ (note: a uniform additive boost $\delta\mathbf{1}$ is trivially futile by softmax translation invariance); (b)~masking the self-observability signal of Theorem~\ref{thm:self_observable}.  Then:
+
+\begin{enumerate}
+\item \textbf{Observation sharpening is retrieval-irrelevant.}  The observation simplex map $\varphi_\beta$ acts on the combined score $S' = S + \sigma + b \in \mathbb{R}^{|X|}$ to produce the attention distribution $a \in \Delta^{|X|}$ and hence the query $q = aE$.  The retrieval simplex map $\varphi_{\beta_r}$ acts on the retrieval scores $qM^\top \in \mathbb{R}^{|M|}$ to produce the retrieval weights $w \in \Delta^{|M|}$.  Increasing $\beta$ in the observation map sharpens $a$ and changes $q$, but the retrieval weights $w = \varphi_{\beta_r}(qM^\top)$ still face a denominator of $|M|$ terms:
+\[
+w_v = \frac{\exp(\beta_r\,q^\top m_v)}{\sum_{j=1}^{|M|}\exp(\beta_r\,q^\top m_j)}.
+\]
+The fan effect of Theorem~\ref{thm:sleep_pressure}(i) is unchanged: every capture event still adds a positive term to the denominator, strictly decreasing all existing $w_j$.  In particular, the critical memory size $|M^*|$ from Theorem~\ref{thm:sleep_pressure}(iv) is independent of $\beta$.
+
+\item \textbf{Constant score boost is asymptotically futile.}  A uniform additive boost $\delta\mathbf{1}$ to all observation scores is trivially futile: $\varphi_\beta(S' + \delta\mathbf{1}) = \varphi_\beta(S')$ by translation invariance of softmax, so the query is unchanged.  The interesting case is a \emph{selective} boost that increases the observation score gap by some effective amount $\delta' > 0$.  Even in this best case, the query $q_{\delta} = a_\delta E$ remains a convex combination of embeddings (Corollary~\ref{cor:budget}), so $\|q_\delta\| \leq R$ and the maximum achievable retrieval score gap is still bounded:
+\[
+g_\delta = q_\delta^\top m_v - \max_{k \neq v} q_\delta^\top m_k \leq 2R^2.
+\]
+If the selective boost increases the effective retrieval gap by $\delta' \leq \delta$, the boosted critical memory size becomes
+\[
+|M^{**}| = 1 + \frac{1-c}{c}\exp(\beta_r(2R^2 + \delta')).
+\]
+Since $|M^*| = 1 + \frac{1-c}{c}\exp(2\beta_r R^2)$, we have $|M^{**}| - 1 = (|M^*| - 1)\exp(\beta_r\delta')$, so $|M^{**}| - 1 = (|M^*| - 1)\exp(\beta_r\delta')$.  For any fixed $\delta$, $|M^{**}|$ is still finite: the system crosses $|M^{**}|$ after at most $\exp(\beta_r\delta)$ times as many capture events as needed to reach $|M^*|$.  The gain is a constant multiplicative factor $\exp(\beta_r\delta')$, which is $O(1)$ in $|M|$ and therefore dominated by the $\Omega(\log|M|)$ growth rate of the required gap.
+
+\item \textbf{Signal masking delays but worsens recovery.}  Suppose the self-observability signal of Theorem~\ref{thm:self_observable} is suppressed: the system cannot detect that $\rho_t < c$ and $\gamma_t < \epsilon$, and therefore does not trigger the $S = 0$ phase.  The system continues waking for $k$ additional steps beyond the point where the sleep condition would have fired.  During these $k$ steps, capture remains active.  By Theorem~\ref{thm:monotone_pressure}(iii), $|M|$ grows with at least $n_k \geq 1$ captures.  Each capture adds an impression at distance at most $2R$ from the anchor (since all impressions lie in $\operatorname{conv}(E(X))$, Lemma~\ref{lem:hull}), so $V_{t_0+k} \leq V_{t_0} + 2R\,n_k$.  By Theorem~\ref{thm:sleep_debt}, the consolidation duration required to reduce $V$ to tolerance $\delta$ is at least $T_{\mathrm{sleep}} \geq \log(V/\delta)/\gamma_{\min}$.  The additional consolidation cost from delaying by $k$ steps is therefore
+\[
+\Delta T_{\mathrm{sleep}} \leq \frac{\log(V_{t_0+k}/V_{t_0})}{\gamma_{\min}} \leq \frac{\log(1 + 2R\,n_k/V_{t_0})}{\gamma_{\min}} = O(\log k\,/\,\gamma_{\min}),
+\]
+since $n_k = O(k)$ with bounded capture rate and $\log(1 + Ck/V_{t_0}) = O(\log k)$.  That is, the $V$-based penalty for delaying consolidation by $k$ steps is at most logarithmic in $k$.  Independently of $V$, the retrieval degradation from $|M|$ growth during those $k$ steps (Theorem~\ref{thm:monotone_pressure}(iv)) is monotone and irreversible without the consolidation phase.
+
+\item \textbf{Decaying boost produces rebound.}  Suppose the boost decays exponentially: $\delta(t) = \delta_0\,\exp(-t/\tau_{\mathrm{half}})$, modelling metabolic clearance with effective half-life $\tau_{\mathrm{half}}$.  At time $t = 0$ (boost applied), the retrieval concentration is $\rho_0 = \max_j w_j^{(0)}$ and $|M_0| = |M(0)|$.  During the boosted period $[0, T_{\mathrm{decay}}]$ where $T_{\mathrm{decay}} = \tau_{\mathrm{half}}\log(\delta_0/\epsilon_\delta)$ for some negligibility threshold $\epsilon_\delta$, the system continues waking with capture active.  Let $|M_{T}| = |M(T_{\mathrm{decay}})|$ denote the memory size after the boost decays.
+
+At $T_{\mathrm{decay}}$, $\delta(T_{\mathrm{decay}}) \leq \epsilon_\delta$ and the observation map reverts to its unboosted form.  The retrieval weight of the anchor at this time satisfies
+\[
+\rho_{T_{\mathrm{decay}}} \leq \frac{1}{1 + (|M_{T}| - 1)\exp(-2R^2)} < \frac{1}{1 + (|M_0| - 1)\exp(-2R^2)} = \rho_0^{\mathrm{bound}},
+\]
+where the strict inequality follows from $|M_T| > |M_0|$ (at least one capture event occurred during the boosted period, by assumption of positive capture rate), and $\rho_0^{\mathrm{bound}}$ is the maximum retrieval concentration achievable with $|M_0|$ impressions under any query.  The \emph{retrieval capacity ceiling} is therefore strictly lower after the boost decays: the best-case retrieval with $|M_T|$ impressions is worse than the best-case with $|M_0|$.  Since the boost only affected the observation map (not the retrieval map), it could not prevent the fan effect from degrading retrieval during the boosted period, and no consolidation occurred to compensate.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\leanok
+\uses{def:retrieval}
+See Lean source: \texttt{Sleep/ScoreBoost.lean}
+\end{proof}
+
+\begin{remark}[Stimulant analogy]
+\label{rem:caffeine}
+\lean{score_boost_retrieval_irrelevant}
+\leanok
+\uses{def:retrieval}
+The two interventions modelled here (masking the pressure signal, temporarily sharpening attention) resemble what stimulants do: suppress the felt need to sleep while leaving the underlying degradation in place.  In both the loop and the biological case, the result is the same: the intervention delays but worsens the eventual consolidation deficit, because $|M|$ continues to grow and $V$ remains high throughout.
+\end{remark}
+
+\begin{definition}[Inter-episode transition interval]
+\label{def:transition}
+\lean{sleepDebt}
+\leanok
+Let $\mathcal{C}_{k^*}$ be the anchor cluster whose consolidation has just completed, and let $\mathcal{C}_{k'}$ be the next anchor cluster.  The \emph{inter-episode transition interval} is
+\[
+\mathcal{T}_{k^* \to k'} = [t_{\mathrm{end}},\; t_{\mathrm{start}}']
+\]
+where $t_{\mathrm{end}}$ is the first time $\gamma(t) < \epsilon$ after the consolidation of $\mathcal{C}_{k^*}$ begins, and $t_{\mathrm{start}}'$ is the first subsequent time at which the anchor $v(t) \in \mathcal{C}_{k'}$ and $\gamma(t) \geq \epsilon$.  Here $\epsilon > 0$ is the same tolerance used in Theorem~\ref{thm:wakeup}(vi).
+\end{definition}
+
+\begin{theorem}[Inter-episode transition dynamics; $\mathcal{A}_+$]
+\label{thm:dream_transitions}
+\lean{dream_transitions_cross_cluster}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval}
+Let $\varphi$ be a continuous positive simplex map.  Suppose the system is in an $S = 0$ phase with capture disabled and $M$ contains $p \geq 2$ well-separated $\epsilon$-clusters $\mathcal{C}_1, \ldots, \mathcal{C}_p$ (Definition~\ref{def:cluster}).  Let $\mathcal{T}_{k^* \to k'}$ be an inter-episode transition interval (Definition~\ref{def:transition}).  Then:
+
+\begin{enumerate}
+\item \textbf{Cross-cluster retrieval.}  For $t \in \mathcal{T}_{k^* \to k'}$, the retrieval output $\ell(t) = w(t)\,M(t)$ is a mixture with positive weight on both the converged cluster $\mathcal{C}_{k^*}$ and the unconsolidated cluster $\mathcal{C}_{k'}$ (since $\varphi$ is positive, $W_k > 0$ for all $k$).  Formally, let $p_{k^*}$ denote the prototype of $\mathcal{C}_{k^*}$ and let $\mu_{k'} = |\mathcal{C}_{k'}|^{-1}\sum_{m \in \mathcal{C}_{k'}} m$ be the centroid of $\mathcal{C}_{k'}$.  Then there exists $t^* \in \mathcal{T}_{k^* \to k'}$ such that
+\[
+\ell(t^*) \notin \operatorname{conv}(\mathcal{C}_{k^*}) \cup \operatorname{conv}(\mathcal{C}_{k'})
+\]
+and the retrieval bias $b(t^*) = EK\ell(t^*)$ points toward a region of embedding space corresponding to neither cluster alone.
+
+\item \textbf{Associative query drift.}  During the transition, the query $q(t) = a(t)\,E$ traces a path in embedding space connecting the two cluster regions.  Specifically, the bias $b(t) = EK\ell(t)$ shifts continuously from $EKp_{k^*}$ to $EK\mu_{k'}$, and hence the attention $a(t) = \varphi(\sigma(t) + b(t))$ and query $q(t) = a(t)\,E$ interpolate between the attention patterns that would arise from each cluster separately.  For any $t \in \mathcal{T}_{k^* \to k'}$, the query satisfies
+\[
+q(t) = a(t)\,E \quad\text{with}\quad a(t) = \varphi(\sigma(t) + EK\ell(t)),
+\]
+where $\ell(t)$ is a mixture of elements from both clusters, so $q(t)$ visits intermediate embedding-space points that correspond to associative blends of the two cluster regions.
+
+\item \textbf{Suppression during waking and stable consolidation.}  Cross-cluster retrieval of the form described in~(i) is suppressed during waking (when $\|S\|$ dominates $\|b\|$) and during stable consolidation:
+\begin{itemize}
+\item During waking with non-trivial external score $S$, the attention is $a = \varphi(S + \sigma + b)$.  When $\|S\| > \|b\|$ (which holds whenever $\|S\| > R^2\|K\|_{\mathrm{op}}$, since $\|b\| \leq R^2\|K\|_{\mathrm{op}}$ by Corollary~\ref{cor:bounded}), $S$ dominates the score, anchoring the query to the $S$-determined region and preventing the retrieval bias $b$ from driving cross-cluster retrieval.  (For marginal stimuli with $\|S\| = O(\|b\|)$, weak cross-cluster effects are possible but do not produce the sustained mixed retrieval of a dream state, since waking capture events continually perturb $M$.)
+\item During stable consolidation within a single cluster $\mathcal{C}_{k^*}$, the anchor $v \in \mathcal{C}_{k^*}$ is fixed (Lemma~\ref{lem:stability}), the retrieval weights concentrate on $\mathcal{C}_{k^*}$ (since the anchor has the highest score).  By Corollary~\ref{cor:retrieval_in_hull}, $\ell \in \operatorname{conv}(M)$.  Since $W_{k^*} > 1/2$ by the cluster separation assumption, the off-cluster contribution satisfies $\|\ell - \sum_{m_j \in \mathcal{C}_{k^*}} \hat{w}_j m_j\| \leq (1 - W_{k^*}) \cdot 2R$ (where $\hat{w}_j = w_j / W_{k^*}$), so $\ell$ lies within distance $(1 - W_{k^*}) \cdot 2R$ of $\operatorname{conv}(\mathcal{C}_{k^*})$, and this error vanishes as the off-cluster weights go to zero.
+\end{itemize}
+Therefore sustained cross-cluster retrieval arises primarily during the inter-episode transitions of the $S = 0$ phase.
+
+\item \textbf{Necessity of transitions for anchor rotation.}  The anchor cannot move from $\mathcal{C}_{k^*}$ to $\mathcal{C}_{k'}$ without passing through a mixed-retrieval state.  By Lemma~\ref{lem:stability}, while $v \in \mathcal{C}_{k^*}$ is the anchor, $\lambda_v = 0$ and $v$ is preserved exactly.  For the anchor to rotate to $\mathcal{C}_{k'}$, the retrieval weights must shift so that some $m_{j'} \in \mathcal{C}_{k'}$ achieves $w_{j'} > w_v$.  Since $w = \varphi(qM^\top)$ depends continuously on $q$, and $q$ depends continuously on $\ell$ through $b = EK\ell$ and $a = \varphi(\sigma + b)$, the transition from $w_v > w_{j'}$ to $w_{j'} > w_v$ must pass through an intermediate state where both clusters have comparable retrieval mass.  At this intermediate state, $\ell$ is a cross-cluster mixture.
+
+\item \textbf{Salience ordering of transitions.}  By Theorem~\ref{thm:oscillation}(v), the first transition $\mathcal{T}_{k^*_1 \to k^*_2}$ connects the most salient cluster under the initial query (highest retrieval mass $W_{k^*_1}$) to the cluster that is most salient among the remaining unconsolidated clusters under the post-convergence query.  Subsequent transitions similarly select the argmax of retrieval mass among remaining clusters at each transition point.  The overall sequential structure recapitulates a salience-driven hierarchy, though the exact ordering may differ from the initial ranking under $q_0$ because the query evolves as each cluster consolidates.
+
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval}
+See Lean source: \texttt{Sleep/DreamTransitions.lean}
+\end{proof}
+
+\begin{remark}[Brevity of transitions (conjecture)]
+\label{rem:transition_brevity}
+\lean{dream_transitions_cross_cluster}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval}
+The transition duration $|\mathcal{T}_{k^* \to k'}| = t_{\mathrm{start}}' - t_{\mathrm{end}}$ appears to be brief relative to the consolidation episodes that precede and follow it.  The consolidation episode for cluster $\mathcal{C}_k$ requires $T_k = O(\log(V_k(0)/\delta)/\gamma_k)$ steps (Corollary~\ref{cor:sleep_duration}).  The transition, by contrast, requires only that the retrieval weights shift enough for the anchor to rotate.  Since $w = \varphi(qM^\top)$ and $q$ depends on $\ell$ through the continuous map $\ell \mapsto EK\ell \mapsto b \mapsto a = \varphi(\sigma + b) \mapsto q = aE$, the weight shift occurs on the timescale of the feedback loop's response.  We conjecture that $|\mathcal{T}_{k^* \to k'}| = O(1)$, so that
+\[
+|\mathcal{T}_{k^* \to k'}| \;/\; T_{k'} \;=\; O(\gamma_{k'} / \log(V_{k'}(0)/\delta)) \;\to\; 0
+\]
+as the consolidation episodes grow, based on the observation that the feedback loop operates at $O(1)$ steps per cycle while the consolidation episode requires $O(\log(V/\delta)/\gamma)$ steps.  A rigorous bound would require quantifying the feedback loop's gain, which depends on the spectral properties of $EK$.  In numerical experiments, transitions consistently occupy $< 10\%$ of total sleep time.
+\end{remark}
+
+\begin{remark}[Inter-episode transitions and the dream-state hypothesis]
+\label{rem:dream_states}
+\lean{dream_transitions_cross_cluster}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval}
+The transitions are forced: without them, the anchor cannot rotate and consolidation stalls at one cluster.  During each transition, the retrieval output $\ell$ blends memories from unrelated clusters (part~(i)), the query drifts continuously between cluster regions (part~(ii)), and the transitions are brief relative to the episodes they connect (Remark~\ref{rem:transition_brevity}).  The combination (cross-domain association, continuous drift, brevity, salience ordering, and necessity) resembles dream phenomenology closely enough to be worth testing empirically, though we do not claim the resemblance is mechanistic.
+\end{remark}
+
+\begin{theorem}[Dream amnesia; $\mathcal{A}_+$]
+\label{thm:dream_amnesia}
+\lean{dream_amnesia_no_storage}
+\leanok
+\uses{def:consolidation, def:retrieval}
+Let $\varphi$ be a continuous positive simplex map.  Suppose the system is in an $S = 0$ phase with capture disabled, and multi-cluster consolidation produces $p - 1$ inter-episode transitions (Theorem~\ref{thm:oscillation}).  Let $\ell_1, \ell_2, \ldots, \ell_{p-1}$ denote the retrieval outputs during the successive transitions, and let $\ell_{\mathrm{final}}$ denote the retrieval output at the last step before the system exits the $S = 0$ phase.  Then:
+
+\begin{enumerate}
+\item \textbf{No storage of dream content.}  During $S = 0$, capture is disabled, so no new impressions enter $M$.  The cross-cluster retrieval outputs $\ell_k$ (Theorem~\ref{thm:dream_transitions}(i)) are computed and influence the feedback loop but are never stored as memory impressions.  Formally, for all $t$ during the $S = 0$ phase, $M(t+1) \subseteq \operatorname{conv}(M(t))$ (consolidation contracts but never adds rows).
+
+\item \textbf{Overwriting of earlier dreams.}  Each transition produces a new retrieval output $\ell_k$ that replaces the previous one in the feedback loop.  The bias entering the next observation is $b(t) = EK\ell(t)$, which depends only on the current retrieval output, not on previous ones.  Therefore the influence of the $k$-th transition's dream content on the system state is overwritten by the $(k+1)$-th transition: for $t$ in the $(k+1)$-th transition interval $\mathcal{T}_{k+1}$,
+\[
+b(t) = EK\ell(t) \quad\text{with}\quad \ell(t) \neq \ell_k,
+\]
+and the system retains no record of $\ell_k$ beyond its indirect effect on the consolidated state of $M$ (which is bounded by the contraction during the intervening consolidation episode) and a trace in $\sigma = C/N$ whose per-step change is $|\Delta\sigma| = O(1/N)$ since $N = \Theta(t)$.
+
+\item \textbf{Fading trace of last dream on waking.}  Suppose the system exits the $S = 0$ phase at time $t_w$ (the wake-up time of Theorem~\ref{thm:wakeup}).  The retrieval output $\ell(t_w) = \ell_{\mathrm{final}}$ persists as a bias in the first waking step: $b(t_w) = EK\ell_{\mathrm{final}}$.  This bias influences the first waking observation via $a(t_w) = \varphi(S(t_w) + \sigma(t_w) + EK\ell_{\mathrm{final}})$.  However, as waking proceeds with capture active:
+\begin{itemize}
+\item Each new observation produces a new query $q(t)$, a new retrieval output $\ell(t)$, and a new bias $b(t) = EK\ell(t)$ that overwrites the dream trace.
+\item After $n$ waking steps, the dream trace decays exponentially.  The full feedback loop $\ell \to b \to a \to q \to w \to \ell$ passes through two softmax applications (observation and retrieval) and the linear maps $E$, $K$, $M$.  The softmax Jacobian $J = \operatorname{diag}(p) - pp^\top$ has spectral norm $\|J\|_2 \leq 1/2$ (since $\|J\|_2 = \max_{\|x\|=1}\operatorname{Var}_p(x) \leq 1/2$; see proof of~(iii) below).  Each softmax Jacobian produces a zero-sum perturbation ($\sum_j \Delta w_j = 0$), so at the output step $\ell = wM$, the perturbation satisfies $\Delta\ell = \sum_j \Delta w_j\,m_j = \sum_j \Delta w_j\,(m_j - v)$ for any fixed $v$.  Choosing $v$ as the consolidation anchor, each centered row has $\|m_j - v\| \leq V(t)$ (the Lyapunov value after sleep).  The per-loop contraction factor is therefore
+\[
+\eta(t) \;\leq\; \tfrac{1}{4}\,\|E\|_{\mathrm{op}}^2\,\|K\|_{\mathrm{op}}\,\|M\|_{\mathrm{op}}\,V(t)\sqrt{|M|}
+\]
+where the two factors of $1/2$ come from the softmax Jacobians, $\|E\|_{\mathrm{op}}^2$ from the embedding (which appears twice: in $b = EK\ell$ and $q = aE$), $\|K\|_{\mathrm{op}}$ from the feedback projection, $\|M\|_{\mathrm{op}}$ from the score sensitivity $qM^\top$, and $V(t)\sqrt{|M|}$ from the zero-sum output bound.  By Theorem~\ref{thm:sleep_efficacy}, $V(t) \to 0$ during consolidation.  Therefore $\eta(t) \to 0$ unconditionally as consolidation completes, regardless of the values of $R$, $|M|$, or $\|E\|_{\mathrm{op}}$.  The dream trace satisfies $\|\Delta\ell(t_w + n)\| \leq \prod_{i=0}^{n-1}\eta(t_w + i)\,\|\Delta\ell(0)\|$, which decays exponentially once $\eta < 1$.  Crucially, the bound applies at the moment of waking ($t = t_w$): at that instant, $V(t_w)$ is near zero because consolidation has just completed (Theorem~\ref{thm:sleep_efficacy}(i)), so $\eta(t_w) \ll 1$.  The dream trace therefore decays exponentially in the first few waking steps, before capture events can appreciably increase $V$.  By the time new captures grow $V$, the trace has already contracted below the noise floor.
+\end{itemize}
+
+\item \textbf{Waking during a transition preserves more.}  If the system exits $S = 0$ during (rather than after) a transition interval $\mathcal{T}_{k^* \to k'}$, the retrieval output $\ell(t_w)$ is a cross-cluster mixture (Theorem~\ref{thm:dream_transitions}(i)).  This produces a cross-cluster initial bias $b(t_w)$ pointing toward neither cluster exclusively.  If capture is enabled immediately, the first waking impressions are biased by this cross-cluster retrieval, and any stimulus satisfying $q(t_w)^\top E(\tau) > \max_k q(t_w)^\top m_k$ is captured.  This effect is transient (decaying as in~(iii)) but provides a window in which the cross-cluster retrieval influences the first waking captures.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\leanok
+\uses{def:consolidation, def:retrieval}
+See Lean source: \texttt{Sleep/DreamAmnesia.lean}
+\end{proof}
+
+\begin{remark}[Dream amnesia]
+\label{rem:dream_amnesia}
+\lean{dream_amnesia_no_storage}
+\leanok
+\uses{def:consolidation, def:retrieval}
+In the loop, dream content is not stored because capture is disabled during the $S = 0$ phase, and the retrieval output $\ell$ is overwritten at each step with no persistent record.  The brief recall window upon mid-dream awakening (part~(iv)) resembles the common experience of remembering a dream upon waking but losing it within minutes.  Whether any system with distinct capture and consolidation phases necessarily fails to record consolidation-phase retrieval is an open question.
+\end{remark}
+
+\chapter{Capture-Consolidation Cycle}\label{ch:capture}
+
+\begin{theorem}[Capture-argmax bound; $\mathcal{A}_+$]
+\label{thm:capture_argmax}
+\lean{GenericEmbedding}
+\leanok
+\uses{def:capture, def:consolidation, def:retrieval, lem:hull}
+Let the system run under constant $S$ with both capture and consolidation enabled.  Assume generic embedding $E$: for any $q \in \operatorname{conv}(E(X))$, $\operatorname{argmax}_\tau q^\top E(\tau)$ is unique.  Then
+\[
+\text{(total captures)} \;\leq\; \text{(total $E$-argmax transitions of $q$)} + 1.
+\]
+Within any period where $\tau^* = \operatorname{argmax}_\tau q^\top E(\tau)$ is constant, capture fires at most once.
+\end{theorem}
+
+\begin{proof}
+\leanok
+\uses{def:capture, def:consolidation, def:retrieval, lem:hull}
+See Lean source: \texttt{CaptureInertness/CaptureArgmax.lean}
+\end{proof}
+
+\begin{proposition}[Perturbative capture inertness; softmax (part (i) needs only $\mathcal{A}_+$)]
+\label{prop:capture_inertness}
+\lean{equilibriumScoreGap}
+\leanok
+\uses{def:accumulation, def:capture, def:retrieval, lem:finite_argmax, lem:sigma_increment, lem:softmax_lipschitz, thm:capture_argmax}
+Under the hypotheses of Theorem~\ref{thm:capture_argmax}, let $q_0^* = \lim_{t \to \infty} q_t^{K=0}$ denote the equilibrium query of the $K = 0$ system (existence proven below).  Define the \emph{equilibrium score gap}
+\[
+\delta_0 = (q_0^*)^\top E(\tau^*) - \max_{\tau \neq \tau^*} (q_0^*)^\top E(\tau), \qquad \tau^* = \operatorname{argmax}_\tau\, (q_0^*)^\top E(\tau).
+\]
+For generic $E$ and $S$, $\delta_0 > 0$ (the argmax at $q_0^*$ is unique).  Let $R = \max_\tau \|E(\tau)\|$ and $\sigma_{\min} = \min_\tau \sigma_0^*(\tau) > 0$ (the minimum equilibrium salience under $K = 0$, positive by $\mathcal{A}_+$).  If
+\[
+\|K\| < \frac{\delta_0}{4R^4(1 + 1/\sigma_{\min})},
+\]
+then there exists a finite $T^*$ such that for all $t > T^*$, capture is inert.
+\end{proposition}
+
+\begin{proof}
+\leanok
+\uses{def:accumulation, def:capture, def:retrieval, lem:finite_argmax, lem:sigma_increment, lem:softmax_lipschitz, thm:capture_argmax}
+See Lean source: \texttt{CaptureInertness/PerturbativeInertness.lean}
+\end{proof}
+
+\begin{corollary}[$K = 0$ capture inertness; $\mathcal{A}_+$]
+\label{cor:K_zero_inertness}
+\lean{K_zero_capture_finite}
+\leanok
+\uses{def:accumulation, def:capture, def:retrieval, thm:capture_argmax}
+When $K = 0$, the total number of capture events is finite under any constant $S$ with generic $E$.  No condition on $\|K\|$ is needed.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:accumulation, def:capture, def:retrieval, thm:capture_argmax}
+See Lean source: \texttt{CaptureInertness/KZeroInertness.lean}
+\end{proof}
+
+\begin{corollary}[Forced cycle covers general $K$; softmax]
+\label{cor:forced_cycle_general_K}
+\lean{forced_cycle_general_K}
+\leanok
+\uses{def:capture, def:retrieval, thm:capture_argmax}
+For any $K$ (including $\|K\| \geq \delta_0/(4R^4(1 + 1/\sigma_{\min}))$), the system is forced into alternating capture and consolidation regimes.  Spontaneous capture inertness is not guaranteed, but the carrying capacity mechanism of Corollary~\ref{cor:forced_cycle} intervenes: $|M|$ reaches $|M^*|$, retrieval degrades below any threshold, and the external sleep gate (Proposition~\ref{prop:sleep_gate}) triggers consolidation.
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:capture, def:retrieval, thm:capture_argmax}
+See Lean source: \texttt{CaptureInertness/ForcedCycleGeneralK.lean}
+\end{proof}
+
+\begin{remark}[$K$-spectrum]
+\label{rem:K_spectrum}
+\lean{forced_cycle_general_K}
+\leanok
+\uses{def:capture, def:retrieval, thm:capture_argmax}
+The results partition the parameter space of $K$ into three regimes:
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Regime} & \textbf{Condition} & \textbf{Mechanism} \\
+\midrule
+$K = 0$ & $b = 0$ & $\sigma$ converges independently; captures finite \\
+Small $K$ & $\|K\| < \delta_0/(4R^4(1 + 1/\sigma_{\min}))$ & Perturbative: $q$ tracks $K{=}0$ trajectory \\
+General $K$ & No bound on $\|K\|$ & Forced cycle via carrying capacity $|M^*|$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+For $K = 0$, capture becomes inert unconditionally (Corollary~\ref{cor:K_zero_inertness}).  For small $K$, capture becomes inert before carrying capacity is reached (Proposition~\ref{prop:capture_inertness}).  For general $K$, the forced cycle (Corollary~\ref{cor:forced_cycle}) is the operative mechanism.  Numerical experiments suggest capture self-terminates under constant $S$ for all tested $\|K\|$ (Figure~\ref{fig:alpha_v_scaling}, right), well beyond the perturbative bound; closing this gap analytically is an open problem (Remark~\ref{rem:phase_decomposition}).
+
+For $K = 0$, the system's transition out of capture is internally driven, resembling voluntary disengagement; for large $K$, it is forced by capacity limits, resembling involuntary shutdown under exhaustion.  The perturbative regime interpolates between these.
+\end{remark}
+
+\begin{remark}[Numerical illustration of the perturbative threshold]
+\label{rem:threshold}
+\lean{equilibriumScoreGap}
+\leanok
+\uses{def:accumulation, def:capture, def:retrieval, lem:finite_argmax, lem:sigma_increment, lem:softmax_lipschitz, thm:capture_argmax}
+For $|X| = 10$ stimuli with random unit embeddings in $\mathbb{R}^8$ ($R = 1$) and $S(\tau_0) = 1$, $S(\tau) = 0$ otherwise, the $K = 0$ equilibrium has $\sigma_{\min} = 0.283$, $\delta_0 = 0.008$, giving a perturbative threshold $\|K\| < 4.4 \times 10^{-4}$.  This bound is conservative: numerically, capture self-terminates for $\|K\|$ up to at least $10$ (the largest value tested), a factor of ${\sim}\,2 \times 10^4$ beyond the bound.  The gap $\delta_0$ varies by two orders of magnitude across stimulus directions ($0.001$ to $0.15$), with the threshold tracking accordingly.  Even with near-degenerate embeddings (angular spread $0.01$ radians), capture self-terminates for all tested $\|K\|$.
+\end{remark}
+
+\begin{remark}[Phase decomposition and open problem]
+\label{rem:phase_decomposition}
+\lean{equilibriumScoreGap}
+\leanok
+\uses{def:accumulation, def:capture, def:retrieval, lem:finite_argmax, lem:sigma_increment, lem:softmax_lipschitz, thm:capture_argmax}
+A finer analysis of the consolidation total variation suggests a wider stability region than the perturbative condition $\|K\| < \delta_0/(4R^4(1 + 1/\sigma_{\min}))$.  Within each capture-free interval, the consolidation dynamics decompose into two phases:
+\begin{enumerate}
+\item \emph{Geometric phase}: $V$ is large, $\gamma \geq \gamma_0(|M|) > 0$, and $V$ decays geometrically.  The consolidation total variation satisfies $\mathrm{TV}_I \leq C_{\mathrm{consol}} \cdot 2R/\gamma_0(|M|)$.
+\item \emph{Self-limiting phase}: $V$ is small, $\gamma \sim c \cdot V$, and $V \sim 1/(ct)$.  The consolidation total variation satisfies $\mathrm{TV}_{II} = O(\ln T)$.
+\end{enumerate}
+The bridge bound ($\|\Delta \ell^{\mathrm{consol}}\| \leq 2V$), the $\gamma \geq c \cdot V$ scaling, and the anchor-switch recovery are all valid within a single interval.
+
+The gap: $\gamma_0(m) \geq \lambda_1 \exp(-4R^2)/(2m)$, so $\mathrm{TV}_I$ grows with $|M|$.  Under the infinite-captures assumption, $|M| \to \infty$, and summing $\mathrm{TV}_I$ over intervals produces $O(n^2)$ growth rather than $O(n)$.  The contradiction argument does not close.
+
+Numerical experiments confirm the $1/|M|$ scaling: under adversarial conditions (rotating $S$ forcing $|M|$ past 1700), $\alpha_v \approx 1.1/|M|$ with the ratio $\alpha_v / (\exp(-4R^2)/|M|)$ stable at ${\approx}\,58$--$62$ across all $|M|$ (Figure~\ref{fig:alpha_v_scaling}, left).  This rules out an $|M|$-independent lower bound on $\alpha_v^{(j)}$ as a resolution strategy.
+
+Under constant $S$ (the setting of Proposition~\ref{prop:capture_inertness}), capture self-terminates within ${\sim}\,10$ steps for all $\|K\|$ tested ($0$ to $5$), well before the gap regime is reached (Figure~\ref{fig:alpha_v_scaling}, right).  The gap is mathematically genuine but dynamically inert under the paper's assumptions.
+
+Two viable resolution strategies remain: bounding the total path length of $\ell$ directly (bypassing $\gamma_0$), or a joint contraction argument on the coupled $(V, q)$ system.  Either would extend Proposition~\ref{prop:capture_inertness} to a wider range of $\|K\|$.  This is an open problem.
+\end{remark}
+
+\begin{corollary}[Sleep need declines with memory maturation; softmax]
+\label{cor:maturation}
+\lean{maturation_capture_rate_declines}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:inter_cluster_sep, def:retrieval}
+Consider the loop operating over repeated wake--sleep cycles.  Let $p_n$ denote the number of unconsolidated clusters at the start of cycle $n$, and let $\tau_n$ denote the capture rate (captures per unit time) during the waking phase of cycle $n$.  Then:
+\begin{enumerate}
+\item \textbf{Capture rate declines with maturation (under stationary stimuli).}  As the number of consolidated prototypes in $M$ grows across cycles, the capture threshold $\max_{k \in M} q^\top m_k$ is non-decreasing in $|M|$: adding a new prototype $m_{\mathrm{new}}$ to $M$ can only increase $\max_k q^\top m_k$ (it adds a candidate to the maximum).  Therefore, for any fixed query distribution, the fraction of stimuli $E(\tau)$ satisfying $q^\top E(\tau) > \max_k q^\top m_k$ is non-increasing in $|M|$.  Under the assumption of a stationary stimulus distribution, the expected capture rate $\mathbb{E}[\tau_n]$ is non-increasing across cycles.
+\item \textbf{Waking period lengthens.}  The time to reach the critical memory size $|M^*|$ from a post-sleep baseline $|M_0^{(n)}|$ is $T_{\mathrm{wake}}^{(n)} = (|M^*| - |M_0^{(n)}|)/\tau_n$.  Since $\mathbb{E}[\tau_n]$ is non-increasing (part~(i)), $T_{\mathrm{wake}}^{(n)}$ is non-decreasing in expectation: the system can sustain longer waking periods before retrieval degrades.
+\item \textbf{Sleep duration shortens.}  By Corollary~\ref{cor:sleep_duration}, the total sleep time scales as $\sum_{k=1}^{p_n} T_k$.  After many cycles of full consolidation, newly captured impressions are close to existing prototypes (since the embedding space is well-covered), so the initial intra-cluster spread $V_k(0)$ is smaller and fewer distinct clusters $p_n$ form.  Both effects reduce total sleep duration.
+\item \textbf{Combined effect.}  The ratio of sleep to total cycle time satisfies
+\[
+\frac{T_{\mathrm{sleep}}^{(n)}}{T_{\mathrm{wake}}^{(n)} + T_{\mathrm{sleep}}^{(n)}} \;\leq\; \frac{\sum_k O(\log(V_k^{(n)}(0)/\delta)/\gamma_k)}{(|M^*| - |M_0^{(n)}|)/\tau_n + \sum_k O(\log(V_k^{(n)}(0)/\delta)/\gamma_k)}.
+\]
+As $\tau_n \to 0$ and $p_n$, $V_k^{(n)}(0)$ decrease with maturation, this ratio decreases: the system needs proportionally less consolidation time per cycle.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:inter_cluster_sep, def:retrieval}
+See Lean source: \texttt{Sleep/Maturation.lean}
+\end{proof}
+
+\begin{remark}[Developmental sleep patterns]
+\label{rem:development}
+\lean{maturation_capture_rate_declines}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:inter_cluster_sep, def:retrieval}
+A system with few prototypes captures nearly everything and requires long consolidation phases; a system with a dense embedding space captures rarely and consolidates fast.  The result depends on no aging-specific mechanism, following entirely from the interaction of the capture threshold with prototype density.  The parallel to the well-documented decline in sleep need across the lifespan is one of several independently derived correspondences (Section~\ref{sec:discussion}).
+\end{remark}
+
+\begin{corollary}[Forced quasi-periodic sleep--wake cycle; softmax]
+\label{cor:forced_cycle}
+\lean{forced_cycle_waking_degrades}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:inter_cluster_sep, def:retrieval}
+Let $\varphi$ be a continuous positive simplex map.  Consider the loop
+with capture enabled during waking and consolidation enabled during sleep
+($S = 0$, capture disabled).  Suppose the external score $S$ is such that
+waking produces a positive capture rate (at least one new impression enters
+$M$ per $\tau$ steps on average).  Then:
+
+\begin{enumerate}
+\item \textbf{Waking degrades retrieval.}  During waking, $|M|$ grows
+monotonically.  By Theorem~\ref{thm:sleep_pressure}, the retrieval
+concentration $\rho = \max_j w_j$ degrades as $\rho \leq 1/|M|$ (for
+uniform inputs) and more generally $\rho$ decreases monotonically
+(Theorem~\ref{thm:monotone_pressure}).  The system reaches a critical
+memory size $|M^*|$ (Theorem~\ref{thm:sleep_pressure}) beyond which
+retrieval precision falls below any desired threshold.
+
+\item \textbf{Degradation is self-observable.}  The pair
+$(\rho, \gamma)$ computed from the system's own state variables
+distinguishes functional from degraded operation
+(Theorem~\ref{thm:self_observable}).  As $|M| \to |M^*|$, the system
+enters the exhaustion regime: $\rho \to 1/|M|$ and $\gamma \to 0$ with
+$V$ bounded away from zero.
+
+\item \textbf{The $S = 0$ phase is necessary and sufficient.}  Entering an $S = 0$
+phase with capture disabled triggers consolidation
+(Theorem~\ref{thm:sleep_efficacy}).  The Lyapunov function $V$ decreases
+strictly at each step (Lemma~\ref{lem:lyapunov}),
+multi-cluster memory undergoes sequential consolidation with oscillatory
+$\gamma$ (Theorem~\ref{thm:oscillation}), dream-like inter-episode
+transitions occur between clusters
+(Theorem~\ref{thm:dream_transitions}), and the system eventually reaches
+a quasi-fixed point (Theorem~\ref{thm:wakeup}).
+
+\item \textbf{Wake-up is self-observable.}  Sleep completion is
+detectable by $\gamma \to 0$ with $\rho$ recovering to
+$\rho \geq 1/(1 + (p-1)\exp(-\beta g_p))$ where $p$ is the number of
+consolidated prototypes and $g_p$ is the inter-prototype score gap
+(Theorem~\ref{thm:sleep_efficacy}(iii)).  This is the completion regime
+of Theorem~\ref{thm:self_observable}: $V \to 0$, $\gamma \to 0$,
+and $\rho$ bounded away from $1/|M|$.  For a single cluster ($p = 1$),
+$\rho \to 1$; for $p \geq 2$ well-separated prototypes, $\rho$ recovers
+to a value determined by the cluster geometry but still far above the
+pre-sleep degraded level $\rho \to 1/|M|$.
+
+\item \textbf{The cycle repeats.}  Once waking resumes, capture begins
+adding new impressions to $M$, retrieval degrades anew
+(Theorem~\ref{thm:monotone_pressure}), and the system again approaches
+the critical size $|M^*|$.  Since each waking phase strictly increases
+$|M|$ (by assumption) and each sleep phase consolidates $M$ to $p$
+prototypes (Theorem~\ref{thm:oscillation}(vi)), the system oscillates
+between:
+\begin{itemize}
+\item \emph{Waking}: $|M|$ grows, $\rho$ decreases, $V$ increases.
+\item \emph{Sleep}: $|M|$ is fixed (capture disabled), $\rho$ recovers,
+$V$ decreases, with internal dream transitions.
+\end{itemize}
+This oscillation is quasi-periodic: the cycle length depends on the
+capture rate during waking and the cluster structure at sleep onset, both
+of which vary across cycles, but the qualitative structure
+(wake $\to$ degrade $\to$ sleep $\to$ recover $\to$ wake) is invariant.
+
+\item \textbf{Sleep debt modulates cycle structure.}  If sleep is
+insufficient (duration $< T_{\mathrm{full}}$,
+Corollary~\ref{cor:sleep_duration}), a residual $V_{\mathrm{res}} > 0$
+persists (Theorem~\ref{thm:sleep_debt}).  This residual adds to the
+degradation of the next waking phase, shortening the effective waking
+capacity and advancing the next sleep onset.  Chronic insufficient
+sleep produces compounding debt $V_\infty = r\Delta V / (1 - r)$
+(Theorem~\ref{thm:sleep_debt}(ii)), eventually exceeding the
+cluster separation $\epsilon_{\mathrm{sep}}$ beyond which the system
+enters permanent degradation during truncated-sleep cycles
+(Theorem~\ref{thm:sleep_debt}(iii)).  Full-length recovery sleep can
+still eliminate the accumulated debt
+(Theorem~\ref{thm:sleep_debt}(iv)), but at logarithmic cost in the
+debt level.  Conversely, naps
+(Theorem~\ref{thm:nap}) provide partial recovery with front-loaded
+benefit, allowing the system to extend waking capacity at the cost of
+reduced total consolidation.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:inter_cluster_sep, def:retrieval}
+See Lean source: \texttt{Sleep/ForcedCycle.lean}
+\end{proof}
+
+\begin{remark}[The capture--consolidation cycle as an emergent property]
+\label{rem:emergent_cycle}
+\lean{forced_cycle_waking_degrades}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:inter_cluster_sep, def:retrieval}
+The cycle is forced by a tension: capture degrades retrieval (Theorem~\ref{thm:sleep_pressure}), but consolidation can only proceed when capture stops (the Lyapunov function requires a stable $M$).  The system detects its own state through $(\rho, \gamma)$ (Theorem~\ref{thm:self_observable}), which suffice to distinguish degradation from
+completion (Theorem~\ref{thm:self_observable}).  The only thing the loop cannot do is flip its own switch: $S$ is an input, not a state variable, so an external controller must read $(\rho, \gamma)$ and toggle the regime (Proposition~\ref{prop:sleep_gate}).
+\end{remark}
+
+\begin{proposition}[Necessity of an external sleep gate; $\mathcal{A}$]
+\label{prop:sleep_gate}
+\lean{sleep_gate_external}
+\leanok
+\uses{def:admissible_scoring, def:observation}
+The loop cannot autonomously transition from waking ($S \neq 0$, capture enabled) to the $S = 0$ consolidation regime.  The external score $S(\tau)$ is an input to the system (Definition~\ref{def:observation}), not a state variable: no step of the loop modifies $S$ or the capture-enable flag.  Therefore, even when the self-observable sleep condition fires ($\rho_t < c$ and $\gamma_t < \epsilon$, Theorem~\ref{thm:self_observable}(d)), the system continues waking indefinitely unless an external controller reads $(\rho_t, \gamma_t)$ and sets $S \leftarrow 0$ with capture disabled.
+\end{proposition}
+
+\begin{proof}
+\leanok
+\uses{def:admissible_scoring, def:observation}
+See Lean source: \texttt{Sleep/SleepGate.lean}
+\end{proof}
+
+\begin{corollary}[Cost of ignoring the sleep signal; softmax]
+\label{cor:insomnia}
+\lean{insomnia_memory_grows}
+\leanok
+Suppose the sleep condition fires at time $t_0$ (i.e.\ $\rho_{t_0} < c$, $\gamma_{t_0} < \epsilon$) but no regime transition occurs: $S$ remains non-zero and capture remains enabled for $k$ additional steps.  Then:
+\begin{enumerate}
+\item $|M|$ continues to grow (Theorem~\ref{thm:monotone_pressure}(iii)), with $\rho$ degrading further.
+\item By Theorem~\ref{thm:sleep_debt}(ii), each additional waking step adds to the consolidation deficit.  The eventual sleep duration required to recover to tolerance $\delta$ satisfies $T_{\mathrm{sleep}} \geq \log(V_{t_0+k}/\delta)/\gamma_{\min}$, which grows as $O(\log k)$ in the number of ignored steps (Theorem~\ref{thm:score_boost}(iii)).
+\item If the signal is ignored indefinitely ($k \to \infty$), the system enters permanent degradation: $\rho \to 1/|M| \to 0$ and $\gamma \to 0$, with $V$ bounded away from zero and growing.  No amount of waking consolidation can reverse this (Theorem~\ref{thm:sleep_pressure}(v)).
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+\leanok
+See Lean source: \texttt{Sleep/Insomnia.lean}
+\end{proof}
+
+\begin{remark}[The minimal controller]
+\label{rem:controller}
+\lean{insomnia_memory_grows}
+\leanok
+Proposition~\ref{prop:sleep_gate} establishes that the loop's regime structure separates cleanly into two components:
+\begin{enumerate}
+\item \textbf{Signal generation}: entirely internal (Theorem~\ref{thm:self_observable}).  The quantities $(\rho, \gamma)$ are computable from the system's own state, require no external oracle, and provide both the onset condition ($\rho < c$, $\gamma < \epsilon$) and the completion condition ($\gamma \to 0$ with $\rho$ recovered).
+\item \textbf{Signal execution}: requires a minimal external controller that reads $(\rho, \gamma)$ and toggles $S$ and the capture flag.  This controller need not be sophisticated: a threshold comparator on two scalar quantities suffices.
+\end{enumerate}
+This separation (the system that generates the pressure signal is not the system that acts on it) is a structural property of the loop, not a limitation.  Biological sleep regulation exhibits the same decomposition: homeostatic pressure accumulates internally, and a separate system reads the signal and executes the regime transition.  The necessity of an external gate is itself a structural match.
+
+If the controller fails to act on the signal, the mathematical consequence is unbounded degradation (Corollary~\ref{cor:insomnia}): logarithmic in the delay for recoverable cases, but permanent if the signal is ignored indefinitely \citep{vandongen2003,dawson1997}.
+\end{remark}
+
+\chapter{Technical Lemmas}\label{ch:technical}
+
+\begin{lemma}[Softmax Lipschitz bound]
+\label{lem:softmax_lipschitz}
+\lean{l1Norm}
+\leanok
+Let $\varphi = \mathrm{softmax}\colon \mathbb{R}^n \to \Delta^n$.  For any $x, y \in \mathbb{R}^n$,
+\[
+\|\varphi(x) - \varphi(y)\|_1 \leq 2\,\|x - y\|_\infty.
+\]
+\end{lemma}
+
+\begin{proof}
+\leanok
+See Lean source: \texttt{CaptureInertness/SoftmaxLipschitz.lean}
+\end{proof}
+
+\begin{lemma}[Accumulation increment bound; $\mathcal{A}_+$]
+\label{lem:sigma_increment}
+\lean{attention_bounded_away}
+\leanok
+\uses{def:accumulation}
+Let $\varphi$ be a positive simplex map with bounded inputs.  For any sequence $\{a_t\}$ with $a_t(\tau) \in [\alpha, 1-\alpha]$ for some $\alpha > 0$ (guaranteed by positivity of $\varphi$ with bounded inputs; for softmax, Theorem~\ref{thm:nondegen} gives an explicit bound), the accumulation rule gives
+\[
+|\sigma_{t+1}(\tau) - \sigma_t(\tau)| = O(1/t)
+\]
+for each $\tau \in X$.  The implied constant depends on $\alpha$ and $N_0$ but not on the specific sequence $\{a_t\}$.
+\end{lemma}
+
+\begin{proof}
+\leanok
+\uses{def:accumulation}
+See Lean source: \texttt{CaptureInertness/SigmaIncrement.lean}
+\end{proof}
+
+\begin{lemma}[Finite argmax crossings under convergent perturbation]
+\label{lem:finite_argmax}
+\lean{argmaxGap}
+\leanok
+\uses{def:retrieval, thm:capture_argmax}
+Let $\{q_t\}$ be a sequence in $\mathbb{R}^d$ converging to $q^*$ with $\sum_t \|q_{t+1} - q_t\| < \infty$.  Let $E \in \mathbb{R}^{n \times d}$ be a fixed embedding such that $\operatorname{argmax}_\tau (q^*)^\top E(\tau)$ is unique.  Then there exists $T_0$ such that for all $t > T_0$,
+\[
+\operatorname{argmax}_\tau\, q_t^\top E(\tau) = \operatorname{argmax}_\tau\, (q^*)^\top E(\tau).
+\]
+The argmax changes at most $T_0$ times.
+\end{lemma}
+
+\begin{proof}
+\leanok
+\uses{def:retrieval, thm:capture_argmax}
+See Lean source: \texttt{CaptureInertness/FiniteArgmax.lean}
+\end{proof}
+
+\chapter{Appendix}\label{ch:appendix}
+
+\begin{theorem}[Phase structure of the $S = 0$ regime; softmax]
+\label{thm:sleep_phases}
+\lean{scoreSpread}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval, lem:softmax_lipschitz}
+Let $\varphi = \operatorname{softmax}$ with parameter $\beta$.  Under $S = 0$ with capture disabled and $|M| \geq 2$, the sleep phase exhibits the following monotone phase structure:
+\begin{enumerate}
+\item \textbf{Score spread (fixed-query).}  Define the fixed-query score spread at step $t$ as $\widetilde{\Delta}_\sigma(t) = \max_j q_t^\top m_j^{(t)} - \min_j q_t^\top m_j^{(t)}$, measured using the query at step $t$ against the memory at step $t$.  Then $\widetilde{\Delta}_\sigma$ is non-increasing under consolidation when measured against a fixed query: for any fixed $q$, $\max_j q^\top m_j^{(t+1)} - \min_j q^\top m_j^{(t+1)} \leq \max_j q^\top m_j^{(t)} - \min_j q^\top m_j^{(t)}$.  Furthermore, the time-varying quantity $\widetilde{\Delta}_\sigma(t)$ converges to zero as $V(t) \to 0$: when all $m_j \to v$, $|q_t^\top m_j - q_t^\top v| \leq \|q_t\|\|m_j - v\| \leq R \cdot V(t) \to 0$ (since $\|q_t\| \leq R$ by Corollary~\ref{cor:query_norm_bound}).
+\item \textbf{Early sleep} ($\widetilde{\Delta}_\sigma$ large): the retrieval weights $w$ are non-uniform ($\max_j w_j \geq 1/(1 + (|M|-1)e^{-\beta\widetilde{\Delta}_\sigma}) > 1/|M|$), producing a variable query $q = aE$ that depends on which impressions dominate retrieval.  The attention distribution $a$ is non-uniform.  The anchor identity may rotate across steps, producing multi-region consolidation: different impressions serve as anchor at different times, and consolidation contracts $M$ toward multiple prototypes simultaneously.
+\item \textbf{Late sleep} ($\widetilde{\Delta}_\sigma$ small): as $V(t) \to 0$ and all $m_j \to v$, the scores satisfy $|q^\top m_j - q^\top v| \leq R\,V(t) \to 0$ for all $j$, so $w_j \to 1/|M|$ (uniform retrieval).  The attention distribution $a$ stabilizes because $\ell \to v$ implies $b \to EKv$ (constant).  The anchor identity is stable (all scores differ by at most $R\,V(t) \to 0$, so the anchor does not rotate).  Consolidation contracts toward a single prototype.
+\item \textbf{Monotone transition.}  The score spread $\widetilde{\Delta}_\sigma(t) \leq 2R\,V(t) \leq 2R\,D(t)$, where $D(t) = \max_{i,j}\|m_i^{(t)} - m_j^{(t)}\|$ is strictly decreasing (Theorem~\ref{thm:sleep_efficacy}(i)), so the transition from early to late sleep is monotone (up to the envelope $2R\,D(t)$) and irreversible within the $S = 0$ phase.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval, lem:softmax_lipschitz}
+See Lean source: \texttt{Appendix/SleepPhases.lean}
+\end{proof}
+
+\begin{remark}[Two-phase structure of the $S = 0$ regime]
+\label{rem:sleep_stages}
+\lean{scoreSpread}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval, lem:softmax_lipschitz}
+Theorem~\ref{thm:sleep_phases} describes a natural two-phase structure within each $S = 0$ episode.  In the early phase, the system consolidates actively (large $\gamma$) with possible anchor rotation.  In the late phase, consolidation slows ($\gamma \to 0$), the anchor stabilizes, and the system approaches a fixed point.  The transition is governed by the Lyapunov function $V(t)$ (via the envelope $\widetilde{\Delta}_\sigma(t) \leq 2R\,V(t)$).  The early phase does the work of memory organization; the late phase signals completion.  The parallel to biological sleep stages (deep NREM followed by lighter sleep) is suggestive but unproven.
+\end{remark}
+
+\begin{proposition}[Aggregate accumulation rigidity; $\mathcal{A}$]
+\label{prop:accum_aggregate}
+\lean{accumulation_rigidity_aggregate}
+\leanok
+\uses{def:accumulation}
+If\/ $\sigma_t \to \sigma_\infty \in (0, \infty)$, then
+$\sum_{s=0}^{t-1} f(s) = \Theta(t^2)$.  Explicitly, there exist
+$\alpha, \beta > 0$ and $T \in \mathbb{N}$ such that for all $t \geq T$,
+\[
+\alpha\,N_t^2 \;\leq\; \sum_{s=0}^{t-1} f(s) \;\leq\; \beta\,N_t^2.
+\]
+\end{proposition}
+
+\begin{proof}
+\leanok
+\uses{def:accumulation}
+See Lean source: \texttt{Rigidity/AccumulationRigidity.lean}
+\end{proof}
+
+\begin{proposition}[Superlinear accumulation; $\mathcal{A}$]
+\label{prop:accum_superlinear}
+\lean{accum_superlinear_implies_sigma_unbounded}
+\leanok
+\uses{def:accumulation}
+If\/ $f(t) \geq c\,(t+1)^2$ for some $c > 0$ and all $t$, then
+$\sigma_t \to \infty$.
+\end{proposition}
+
+\begin{proof}
+\leanok
+\uses{def:accumulation}
+See Lean source: \texttt{Rigidity/AccumulationRigidity.lean}
+\end{proof}
+
+\begin{proposition}[Sublinear accumulation; $\mathcal{A}$]
+\label{prop:accum_sublinear}
+\lean{accum_sublinear_implies_sigma_zero}
+\leanok
+\uses{def:accumulation}
+If\/ $f = o(t)$, then $\sigma_t \to 0$.
+\end{proposition}
+
+\begin{proof}
+\leanok
+\uses{def:accumulation}
+See Lean source: \texttt{Rigidity/AccumulationRigidity.lean}
+\end{proof}
+
+\begin{definition}[Nap]
+\label{def:nap}
+\lean{sleepDebt}
+\leanok
+A \emph{nap} of duration $k$ is an $S = 0$ phase with capture disabled
+lasting exactly $k$ consolidation steps.  We say the nap is
+\emph{short} if $k < T_{\mathrm{full}} := \sum_{i=1}^{p} T_i$, where
+$T_i$ is the convergence time for cluster $\mathcal{C}_i$
+(Corollary~\ref{cor:sleep_duration}), and $p$ is the number of
+well-separated clusters at nap onset (Definition~\ref{def:cluster}).
+A \emph{split sleep schedule} consists of two naps of durations
+$k_1, k_2$ separated by a waking interval of $W \geq 1$ steps (with
+capture and external stimulation re-enabled).
+\end{definition}
+
+\begin{theorem}[Naps as partial-cycle consolidation; $\mathcal{A}_+$]
+\label{thm:nap}
+\lean{nap_front_loaded}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:nap, def:retrieval, def:sleep_debt, def:transition}
+Let $\varphi$ be a continuous positive simplex map.  Suppose the system
+enters a nap of duration $k$ with $|M| \geq 2$ and initial Lyapunov
+value $V(0) > 0$.  Let $\gamma > 0$ be a uniform lower bound on the
+contraction rate during the nap (which exists by
+Corollary~\ref{cor:contraction} since $\varphi$ is
+positive and $V > 0$).  Then:
+
+\begin{enumerate}
+\item \textbf{Front-loaded benefit.}  Let $\alpha := (1-\gamma)^k$.  The ratio of Lyapunov reduction in the second $k$-step window to that in the first satisfies $R_2/R_1 \leq \alpha/(1-\alpha)$.  In particular, when $k \geq \lceil\log 2\,/\,\log(1/(1-\gamma))\rceil$ (equivalently $(1-\gamma)^k \leq 1/2$), the first $k$ steps produce at least as much reduction as the next $k$ steps:
+\[
+V(0) - V(k) \geq V(k) - V(2k).
+\]
+For small $\gamma$, the sufficient condition $k \geq \lceil(\log 2)/\gamma\rceil$ ensures this (since $-\log(1-\gamma) \geq \gamma$).  Regardless of whether $\alpha \leq 1/2$, the benefit is exponentially front-loaded: each successive window of $k$ steps produces at most $\alpha/(1-\alpha)$ times the reduction of the previous window.
+
+\item \textbf{Single-cluster consolidation.}  Suppose $M$ contains
+$p \geq 2$ well-separated $\epsilon$-clusters
+$\mathcal{C}_1, \ldots, \mathcal{C}_p$ (Definition~\ref{def:cluster}).
+Let $T_1$ be the convergence time of the anchor cluster
+$\mathcal{C}_{k^*}$ at nap onset (Corollary~\ref{cor:sleep_duration}).
+\begin{enumerate}
+\item If $k < T_1$, the nap partially consolidates
+$\mathcal{C}_{k^*}$ only: $\Delta_{k^*}(q)$ decreases while the
+intra-cluster spreads $\Delta_{k'}(q)$ for $k' \neq k^*$ change by at most $O(\epsilon)$ per step.
+\item If $T_1 \leq k < T_1 + T_2$, the nap fully consolidates
+$\mathcal{C}_{k^*}$ and partially consolidates the next cluster
+$\mathcal{C}_{k^*_2}$ in the salience ordering of
+Theorem~\ref{thm:oscillation}(v).
+\end{enumerate}
+In either case, the nap consolidates at most
+$\lceil k / \min_i T_i \rceil$ clusters.
+
+\item \textbf{Split sleep consolidates different clusters.}
+Consider a split sleep schedule: nap$_1$ of duration $k_1$, then $W$
+waking steps, then nap$_2$ of duration $k_2$.  During the waking
+interval, external stimulation $S$, accumulation ($\sigma$ update), and
+potential capture events change the query context: let $q_1$ be the
+query at nap$_1$ onset and $q_2$ the query at nap$_2$ onset.  Then
+$q_2 \neq q_1$ in general, and the anchor cluster at nap$_2$ onset may
+differ from the anchor cluster at nap$_1$ onset.  Formally: if the
+waking interval induces $\|q_2 - q_1\| > 0$ sufficient to change the
+identity of $\arg\max_j q^\top m_j$, then the anchor cluster rotates.
+Split sleep can therefore consolidate different clusters that a single
+continuous sleep of duration $k_1 + k_2$ would process sequentially
+from the same starting query.
+
+\item \textbf{Split sleep preserves more prototypes when $T_{\mathrm{rot}} < 1/\gamma_{\min}$.}  Under a
+single continuous sleep of duration $k_1 + k_2$, the system
+consolidates clusters sequentially from one initial query direction
+(Theorem~\ref{thm:oscillation}(v)).  With split sleep, the waking
+interval changes $q$, potentially approaching the same clusters from
+different angles.  By Corollary~\ref{cor:variability},
+if the effective rotation timescale $T_{\mathrm{rot}}$ induced by the
+waking interval satisfies $T_{\mathrm{rot}} < 1/\gamma_{\min}$, distinct
+impressions within a cluster are preserved rather than collapsed to a
+single prototype.  Split sleep therefore has the potential to preserve
+more fine-grained structure within clusters than continuous sleep of
+the same total duration.
+
+\item \textbf{Diminishing returns of naps.}
+Consider a sequence of naps within the same waking period.  The first
+nap reduces $V$ by the front-loaded amount $V(0)[1 - (1-\gamma)^{k_1}]$
+(part (i)).  After a waking interval, the second nap starts from a state
+where the most salient cluster has already been partially consolidated
+by the first nap.  If the second nap engages the same cluster, its
+initial $V$ is smaller by the factor $(1 - \gamma)^{k_1}$, and its
+absolute reduction is correspondingly smaller.  If the second nap
+engages a different cluster (part (iii)), that cluster's $V$ may be
+comparable to the original, but the \emph{marginal system-wide benefit}
+is still smaller because the most salient cluster (largest contribution
+to retrieval degradation) was already addressed.  Each successive nap
+provides less total $V$ reduction.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:nap, def:retrieval, def:sleep_debt, def:transition}
+See Lean source: \texttt{Appendix/Naps.lean}
+\end{proof}
+
+\begin{remark}[Short consolidation episodes and split schedules]
+\label{rem:naps}
+\lean{nap_front_loaded}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:nap, def:retrieval, def:sleep_debt, def:transition}
+The front-loading result (part~(i)) implies that a nap of duration $k$ achieves a fraction $1 - (1-\gamma)^k$ of the full single-cluster benefit, so a nap with $\gamma k > \log 2$ already captures more than half.  The split-sleep result (parts~(ii)--(iii)) is more surprising: two short naps separated by a waking interval can consolidate \emph{different} clusters, achieving coverage a single continuous episode of the same total length cannot.  The tradeoff is diminishing returns within a single capture interval (part~(v)) versus broader coverage across intervals.
+\end{remark}
+
+\begin{corollary}[Continuous sleep vs.\ split sleep; $\mathcal{A}_+$]
+\label{cor:split_vs_continuous}
+\lean{split_vs_continuous_continuous}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:nap, def:sleep_debt, def:transition}
+Let $K_{\mathrm{total}} = k_1 + k_2$ be a fixed total sleep budget.
+\begin{enumerate}
+\item Continuous sleep of duration $K_{\mathrm{total}}$ produces total
+$V$ reduction of at least $V(0)[1 - (1-\gamma)^{K_{\mathrm{total}}}]$ in
+the anchor cluster and processes up to
+$\lceil K_{\mathrm{total}} / \min_i T_i \rceil$ clusters sequentially.
+\item Split sleep with naps of duration $k_1, k_2$ and a waking interval
+consolidates potentially different clusters, achieving comparable total
+$V$ reduction (both schedules are governed by the same contraction
+bound) while processing clusters from different query contexts.
+\item The choice between continuous and split sleep involves a
+trade-off: continuous sleep achieves deeper consolidation of the
+most salient cluster, while split sleep achieves broader coverage
+across clusters.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+\leanok
+\uses{def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:nap, def:sleep_debt, def:transition}
+See Lean source: \texttt{Appendix/SplitVsContinuous.lean}
+\end{proof}

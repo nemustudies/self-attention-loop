@@ -1,0 +1,7 @@
+{
+    "challenge_module": "SleepLoop.ComparatorChallenge",
+    "solution_module": "SleepLoop.ProofOfMainTheorem",
+    "theorem_names": ["mainTheorem"],
+    "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+    "enable_nanoda": false
+}

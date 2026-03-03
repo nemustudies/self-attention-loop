@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>a math loop that sleeps and dreams: Technical Lemmas</title>
+<link rel="next" href="ch-appendix.html" title="Appendix" />
+<link rel="prev" href="ch-capture.html" title="Capture-Consolidation Cycle" />
+<link rel="up" href="index.html" title="a math loop that sleeps and dreams" />
+<link rel="stylesheet" href="styles/theme-white.css" /><link rel="stylesheet" href="styles/theme-sleepy.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">a math loop that sleeps and dreams</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref">1</span> <span class="toc_entry">Definitions</span></a>
+ </li>
+<li class="">
+  <a href="ch-rigidity.html"><span class="toc_ref">2</span> <span class="toc_entry">Rigidity</span></a>
+ </li>
+<li class="">
+  <a href="ch-core.html"><span class="toc_ref">3</span> <span class="toc_entry">Core Dynamics</span></a>
+ </li>
+<li class="">
+  <a href="ch-sleep.html"><span class="toc_ref">4</span> <span class="toc_entry">Sleep Dynamics</span></a>
+ </li>
+<li class="">
+  <a href="ch-capture.html"><span class="toc_ref">5</span> <span class="toc_entry">Capture-Consolidation Cycle</span></a>
+ </li>
+<li class=" active current">
+  <a href="ch-technical.html"><span class="toc_ref">6</span> <span class="toc_entry">Technical Lemmas</span></a>
+ </li>
+<li class="">
+  <a href="ch-appendix.html"><span class="toc_ref">7</span> <span class="toc_entry">Appendix</span></a>
+ </li>
+<li class="">
+ </li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="ch:technical">6 Technical Lemmas</h1>
+
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:softmax_lipschitz">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">89</span>
+    <span class="lemma_thmtitle">Softmax Lipschitz bound</span>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  l1Norm Let \(\varphi = \mathrm{softmax}\colon \mathbb {R}^n \to \Delta ^n\). For any \(x, y \in \mathbb {R}^n\), </p>
+<div class="displaymath" id="a0000000100">
+  \[  \| \varphi (x) - \varphi (y)\| _1 \leq 2\, \| x - y\| _\infty .  \]
+</div>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000101">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>See Lean source: <span class="ttfamily">CaptureInertness/SoftmaxLipschitz.lean</span> </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:sigma_increment">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">90</span>
+    <span class="lemma_thmtitle">Accumulation increment bound; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  attention_bounded_away def:accumulation Let \(\varphi \) be a positive simplex map with bounded inputs. For any sequence \(\{ a_t\} \) with \(a_t(\tau ) \in [\alpha , 1-\alpha ]\) for some \(\alpha {\gt} 0\) (guaranteed by positivity of \(\varphi \) with bounded inputs; for softmax, Theorem&#160;<a href="ch-core.html#thm:nondegen">25</a> gives an explicit bound), the accumulation rule gives </p>
+<div class="displaymath" id="a0000000102">
+  \[  |\sigma _{t+1}(\tau ) - \sigma _t(\tau )| = O(1/t)  \]
+</div>
+<p> for each \(\tau \in X\). The implied constant depends on \(\alpha \) and \(N_0\) but not on the specific sequence \(\{ a_t\} \). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000103">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:accumulation See Lean source: <span class="ttfamily">CaptureInertness/SigmaIncrement.lean</span> </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:finite_argmax">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">91</span>
+    <span class="lemma_thmtitle">Finite argmax crossings under convergent perturbation</span>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  argmaxGap def:retrieval, thm:capture_argmax Let \(\{ q_t\} \) be a sequence in \(\mathbb {R}^d\) converging to \(q^*\) with \(\sum _t \| q_{t+1} - q_t\|  {\lt} \infty \). Let \(E \in \mathbb {R}^{n \times d}\) be a fixed embedding such that \(\operatorname {argmax}_\tau (q^*)^\top E(\tau )\) is unique. Then there exists \(T_0\) such that for all \(t {\gt} T_0\), </p>
+<div class="displaymath" id="a0000000104">
+  \[  \operatorname {argmax}_\tau \,  q_t^\top E(\tau ) = \operatorname {argmax}_\tau \,  (q^*)^\top E(\tau ).  \]
+</div>
+<p> The argmax changes at most \(T_0\) times. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000105">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:retrieval, thm:capture_argmax See Lean source: <span class="ttfamily">CaptureInertness/FiniteArgmax.lean</span> </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="ch-capture.html" title="Capture-Consolidation Cycle"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="a math loop that sleeps and dreams"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="ch-appendix.html" title="Appendix"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

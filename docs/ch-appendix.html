@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>a math loop that sleeps and dreams: Appendix</title>
+<link rel="prev" href="ch-technical.html" title="Technical Lemmas" />
+<link rel="up" href="index.html" title="a math loop that sleeps and dreams" />
+<link rel="stylesheet" href="styles/theme-white.css" /><link rel="stylesheet" href="styles/theme-sleepy.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">a math loop that sleeps and dreams</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref">1</span> <span class="toc_entry">Definitions</span></a>
+ </li>
+<li class="">
+  <a href="ch-rigidity.html"><span class="toc_ref">2</span> <span class="toc_entry">Rigidity</span></a>
+ </li>
+<li class="">
+  <a href="ch-core.html"><span class="toc_ref">3</span> <span class="toc_entry">Core Dynamics</span></a>
+ </li>
+<li class="">
+  <a href="ch-sleep.html"><span class="toc_ref">4</span> <span class="toc_entry">Sleep Dynamics</span></a>
+ </li>
+<li class="">
+  <a href="ch-capture.html"><span class="toc_ref">5</span> <span class="toc_entry">Capture-Consolidation Cycle</span></a>
+ </li>
+<li class="">
+  <a href="ch-technical.html"><span class="toc_ref">6</span> <span class="toc_entry">Technical Lemmas</span></a>
+ </li>
+<li class=" active current">
+  <a href="ch-appendix.html"><span class="toc_ref">7</span> <span class="toc_entry">Appendix</span></a>
+ </li>
+<li class="">
+ </li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="ch:appendix">7 Appendix</h1>
+
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:sleep_phases">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">92</span>
+    <span class="theorem_thmtitle">Phase structure of the \(S = 0\) regime; softmax</span>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  scoreSpread def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval, lem:softmax_lipschitz Let \(\varphi = \operatorname {softmax}\) with parameter \(\beta \). Under \(S = 0\) with capture disabled and \(|M| \geq 2\), the sleep phase exhibits the following monotone phase structure: </p>
+<ol class="enumerate">
+  <li><p><b class="bfseries">Score spread (fixed-query).</b> Define the fixed-query score spread at step \(t\) as \(\widetilde{\Delta }_\sigma (t) = \max _j q_t^\top m_j^{(t)} - \min _j q_t^\top m_j^{(t)}\), measured using the query at step \(t\) against the memory at step \(t\). Then \(\widetilde{\Delta }_\sigma \) is non-increasing under consolidation when measured against a fixed query: for any fixed \(q\), \(\max _j q^\top m_j^{(t+1)} - \min _j q^\top m_j^{(t+1)} \leq \max _j q^\top m_j^{(t)} - \min _j q^\top m_j^{(t)}\). Furthermore, the time-varying quantity \(\widetilde{\Delta }_\sigma (t)\) converges to zero as \(V(t) \to 0\): when all \(m_j \to v\), \(|q_t^\top m_j - q_t^\top v| \leq \| q_t\| \| m_j - v\|  \leq R \cdot V(t) \to 0\) (since \(\| q_t\|  \leq R\) by Corollary&#160;<a href="ch-core.html#cor:query_norm_bound">27</a>). </p>
+</li>
+  <li><p><b class="bfseries">Early sleep</b> (\(\widetilde{\Delta }_\sigma \) large): the retrieval weights \(w\) are non-uniform (\(\max _j w_j \geq 1/(1 + (|M|-1)e^{-\beta \widetilde{\Delta }_\sigma }) {\gt} 1/|M|\)), producing a variable query \(q = aE\) that depends on which impressions dominate retrieval. The attention distribution \(a\) is non-uniform. The anchor identity may rotate across steps, producing multi-region consolidation: different impressions serve as anchor at different times, and consolidation contracts \(M\) toward multiple prototypes simultaneously. </p>
+</li>
+  <li><p><b class="bfseries">Late sleep</b> (\(\widetilde{\Delta }_\sigma \) small): as \(V(t) \to 0\) and all \(m_j \to v\), the scores satisfy \(|q^\top m_j - q^\top v| \leq R\, V(t) \to 0\) for all \(j\), so \(w_j \to 1/|M|\) (uniform retrieval). The attention distribution \(a\) stabilizes because \(\ell \to v\) implies \(b \to EKv\) (constant). The anchor identity is stable (all scores differ by at most \(R\, V(t) \to 0\), so the anchor does not rotate). Consolidation contracts toward a single prototype. </p>
+</li>
+  <li><p><b class="bfseries">Monotone transition.</b> The score spread \(\widetilde{\Delta }_\sigma (t) \leq 2R\, V(t) \leq 2R\, D(t)\), where \(D(t) = \max _{i,j}\| m_i^{(t)} - m_j^{(t)}\| \) is strictly decreasing (Theorem&#160;<a href="ch-sleep.html#thm:sleep_efficacy">49</a>(i)), so the transition from early to late sleep is monotone (up to the envelope \(2R\, D(t)\)) and irreversible within the \(S = 0\) phase. </p>
+</li>
+</ol>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000106">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval, lem:softmax_lipschitz See Lean source: <span class="ttfamily">Appendix/SleepPhases.lean</span> </p>
+
+  </div>
+</div>
+<div class="remark_thmwrapper theorem-style-remark" id="rem:sleep_stages">
+  <div class="remark_thmheading">
+    <span class="remark_thmcaption">
+    Remark
+    </span>
+    <span class="remark_thmlabel">93</span>
+    <span class="remark_thmtitle">Two-phase structure of the \(S = 0\) regime</span>
+  </div>
+  <div class="remark_thmcontent">
+  <p>  scoreSpread def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:retrieval, lem:softmax_lipschitz Theorem&#160;<a href="ch-appendix.html#thm:sleep_phases">92</a> describes a natural two-phase structure within each \(S = 0\) episode. In the early phase, the system consolidates actively (large \(\gamma \)) with possible anchor rotation. In the late phase, consolidation slows (\(\gamma \to 0\)), the anchor stabilizes, and the system approaches a fixed point. The transition is governed by the Lyapunov function \(V(t)\) (via the envelope \(\widetilde{\Delta }_\sigma (t) \leq 2R\, V(t)\)). The early phase does the work of memory organization; the late phase signals completion. The parallel to biological sleep stages (deep NREM followed by lighter sleep) is suggestive but unproven. </p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:accum_aggregate">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">94</span>
+    <span class="proposition_thmtitle">Aggregate accumulation rigidity; \(\mathcal{A}\)</span>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  accumulation_rigidity_aggregate def:accumulation If  \(\sigma _t \to \sigma _\infty \in (0, \infty )\), then \(\sum _{s=0}^{t-1} f(s) = \Theta (t^2)\). Explicitly, there exist \(\alpha , \beta {\gt} 0\) and \(T \in \mathbb {N}\) such that for all \(t \geq T\), </p>
+<div class="displaymath" id="a0000000107">
+  \[  \alpha \, N_t^2 \; \leq \;  \sum _{s=0}^{t-1} f(s) \; \leq \;  \beta \, N_t^2.  \]
+</div>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000108">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:accumulation See Lean source: <span class="ttfamily">Rigidity/AccumulationRigidity.lean</span> </p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:accum_superlinear">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">95</span>
+    <span class="proposition_thmtitle">Superlinear accumulation; \(\mathcal{A}\)</span>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  accum_superlinear_implies_sigma_unbounded def:accumulation If  \(f(t) \geq c\, (t+1)^2\) for some \(c {\gt} 0\) and all \(t\), then \(\sigma _t \to \infty \). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000109">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:accumulation See Lean source: <span class="ttfamily">Rigidity/AccumulationRigidity.lean</span> </p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:accum_sublinear">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">96</span>
+    <span class="proposition_thmtitle">Sublinear accumulation; \(\mathcal{A}\)</span>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  accum_sublinear_implies_sigma_zero def:accumulation If  \(f = o(t)\), then \(\sigma _t \to 0\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000110">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:accumulation See Lean source: <span class="ttfamily">Rigidity/AccumulationRigidity.lean</span> </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:nap">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">97</span>
+    <span class="definition_thmtitle">Nap</span>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  sleepDebt A <em>nap</em> of duration \(k\) is an \(S = 0\) phase with capture disabled lasting exactly \(k\) consolidation steps. We say the nap is <em>short</em> if \(k {\lt} T_{\mathrm{full}} := \sum _{i=1}^{p} T_i\), where \(T_i\) is the convergence time for cluster \(\mathcal{C}_i\) (Corollary&#160;<a href="ch-sleep.html#cor:sleep_duration">61</a>), and \(p\) is the number of well-separated clusters at nap onset (Definition&#160;<a href="ch-sleep.html#def:cluster">56</a>). A <em>split sleep schedule</em> consists of two naps of durations \(k_1, k_2\) separated by a waking interval of \(W \geq 1\) steps (with capture and external stimulation re-enabled). </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:nap">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">98</span>
+    <span class="theorem_thmtitle">Naps as partial-cycle consolidation; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  nap_front_loaded def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:nap, def:retrieval, def:sleep_debt, def:transition Let \(\varphi \) be a continuous positive simplex map. Suppose the system enters a nap of duration \(k\) with \(|M| \geq 2\) and initial Lyapunov value \(V(0) {\gt} 0\). Let \(\gamma {\gt} 0\) be a uniform lower bound on the contraction rate during the nap (which exists by Corollary&#160;<a href="ch-core.html#cor:contraction">30</a> since \(\varphi \) is positive and \(V {\gt} 0\)). Then: </p>
+<ol class="enumerate">
+  <li><p><b class="bfseries">Front-loaded benefit.</b> Let \(\alpha := (1-\gamma )^k\). The ratio of Lyapunov reduction in the second \(k\)-step window to that in the first satisfies \(R_2/R_1 \leq \alpha /(1-\alpha )\). In particular, when \(k \geq \lceil \log 2\, /\, \log (1/(1-\gamma ))\rceil \) (equivalently \((1-\gamma )^k \leq 1/2\)), the first \(k\) steps produce at least as much reduction as the next \(k\) steps: </p>
+<div class="displaymath" id="a0000000111">
+  \[  V(0) - V(k) \geq V(k) - V(2k).  \]
+</div>
+<p> For small \(\gamma \), the sufficient condition \(k \geq \lceil (\log 2)/\gamma \rceil \) ensures this (since \(-\log (1-\gamma ) \geq \gamma \)). Regardless of whether \(\alpha \leq 1/2\), the benefit is exponentially front-loaded: each successive window of \(k\) steps produces at most \(\alpha /(1-\alpha )\) times the reduction of the previous window. </p>
+</li>
+  <li><p><b class="bfseries">Single-cluster consolidation.</b> Suppose \(M\) contains \(p \geq 2\) well-separated \(\epsilon \)-clusters \(\mathcal{C}_1, \ldots , \mathcal{C}_p\) (Definition&#160;<a href="ch-sleep.html#def:cluster">56</a>). Let \(T_1\) be the convergence time of the anchor cluster \(\mathcal{C}_{k^*}\) at nap onset (Corollary&#160;<a href="ch-sleep.html#cor:sleep_duration">61</a>). </p>
+<ol class="enumerate">
+  <li><p>If \(k {\lt} T_1\), the nap partially consolidates \(\mathcal{C}_{k^*}\) only: \(\Delta _{k^*}(q)\) decreases while the intra-cluster spreads \(\Delta _{k'}(q)\) for \(k' \neq k^*\) change by at most \(O(\epsilon )\) per step. </p>
+</li>
+  <li><p>If \(T_1 \leq k {\lt} T_1 + T_2\), the nap fully consolidates \(\mathcal{C}_{k^*}\) and partially consolidates the next cluster \(\mathcal{C}_{k^*_2}\) in the salience ordering of Theorem&#160;<a href="ch-sleep.html#thm:oscillation">58</a>(v). </p>
+</li>
+</ol>
+<p> In either case, the nap consolidates at most \(\lceil k / \min _i T_i \rceil \) clusters. </p>
+</li>
+  <li><p><b class="bfseries">Split sleep consolidates different clusters.</b> Consider a split sleep schedule: nap\(_1\) of duration \(k_1\), then \(W\) waking steps, then nap\(_2\) of duration \(k_2\). During the waking interval, external stimulation \(S\), accumulation (\(\sigma \) update), and potential capture events change the query context: let \(q_1\) be the query at nap\(_1\) onset and \(q_2\) the query at nap\(_2\) onset. Then \(q_2 \neq q_1\) in general, and the anchor cluster at nap\(_2\) onset may differ from the anchor cluster at nap\(_1\) onset. Formally: if the waking interval induces \(\| q_2 - q_1\|  {\gt} 0\) sufficient to change the identity of \(\arg \max _j q^\top m_j\), then the anchor cluster rotates. Split sleep can therefore consolidate different clusters that a single continuous sleep of duration \(k_1 + k_2\) would process sequentially from the same starting query. </p>
+</li>
+  <li><p><b class="bfseries">Split sleep preserves more prototypes when \(T_{\mathrm{rot}} {\lt} 1/\gamma _{\min }\).</b> Under a single continuous sleep of duration \(k_1 + k_2\), the system consolidates clusters sequentially from one initial query direction (Theorem&#160;<a href="ch-sleep.html#thm:oscillation">58</a>(v)). With split sleep, the waking interval changes \(q\), potentially approaching the same clusters from different angles. By Corollary&#160;<a href="ch-core.html#cor:variability">37</a>, if the effective rotation timescale \(T_{\mathrm{rot}}\) induced by the waking interval satisfies \(T_{\mathrm{rot}} {\lt} 1/\gamma _{\min }\), distinct impressions within a cluster are preserved rather than collapsed to a single prototype. Split sleep therefore has the potential to preserve more fine-grained structure within clusters than continuous sleep of the same total duration. </p>
+</li>
+  <li><p><b class="bfseries">Diminishing returns of naps.</b> Consider a sequence of naps within the same waking period. The first nap reduces \(V\) by the front-loaded amount \(V(0)[1 - (1-\gamma )^{k_1}]\) (part (i)). After a waking interval, the second nap starts from a state where the most salient cluster has already been partially consolidated by the first nap. If the second nap engages the same cluster, its initial \(V\) is smaller by the factor \((1 - \gamma )^{k_1}\), and its absolute reduction is correspondingly smaller. If the second nap engages a different cluster (part (iii)), that cluster’s \(V\) may be comparable to the original, but the <em>marginal system-wide benefit</em> is still smaller because the most salient cluster (largest contribution to retrieval degradation) was already addressed. Each successive nap provides less total \(V\) reduction. </p>
+</li>
+</ol>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000112">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:nap, def:retrieval, def:sleep_debt, def:transition See Lean source: <span class="ttfamily">Appendix/Naps.lean</span> </p>
+
+  </div>
+</div>
+<div class="remark_thmwrapper theorem-style-remark" id="rem:naps">
+  <div class="remark_thmheading">
+    <span class="remark_thmcaption">
+    Remark
+    </span>
+    <span class="remark_thmlabel">99</span>
+    <span class="remark_thmtitle">Short consolidation episodes and split schedules</span>
+  </div>
+  <div class="remark_thmcontent">
+  <p>  nap_front_loaded def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:nap, def:retrieval, def:sleep_debt, def:transition The front-loading result (part&#160;(i)) implies that a nap of duration \(k\) achieves a fraction \(1 - (1-\gamma )^k\) of the full single-cluster benefit, so a nap with \(\gamma k {\gt} \log 2\) already captures more than half. The split-sleep result (parts&#160;(ii)–(iii)) is more surprising: two short naps separated by a waking interval can consolidate <em>different</em> clusters, achieving coverage a single continuous episode of the same total length cannot. The tradeoff is diminishing returns within a single capture interval (part&#160;(v)) versus broader coverage across intervals. </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:split_vs_continuous">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">100</span>
+    <span class="corollary_thmtitle">Continuous sleep vs. split sleep; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  split_vs_continuous_continuous def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:nap, def:sleep_debt, def:transition Let \(K_{\mathrm{total}} = k_1 + k_2\) be a fixed total sleep budget. </p>
+<ol class="enumerate">
+  <li><p>Continuous sleep of duration \(K_{\mathrm{total}}\) produces total \(V\) reduction of at least \(V(0)[1 - (1-\gamma )^{K_{\mathrm{total}}}]\) in the anchor cluster and processes up to \(\lceil K_{\mathrm{total}} / \min _i T_i \rceil \) clusters sequentially. </p>
+</li>
+  <li><p>Split sleep with naps of duration \(k_1, k_2\) and a waking interval consolidates potentially different clusters, achieving comparable total \(V\) reduction (both schedules are governed by the same contraction bound) while processing clusters from different query contexts. </p>
+</li>
+  <li><p>The choice between continuous and split sleep involves a trade-off: continuous sleep achieves deeper consolidation of the most salient cluster, while split sleep achieves broader coverage across clusters. </p>
+</li>
+</ol>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000113">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:cluster, def:cluster_salience, def:consolidation, def:inter_cluster_sep, def:nap, def:sleep_debt, def:transition See Lean source: <span class="ttfamily">Appendix/SplitVsContinuous.lean</span> </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="ch-technical.html" title="Technical Lemmas"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="a math loop that sleeps and dreams"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

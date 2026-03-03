@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>a math loop that sleeps and dreams: Capture-Consolidation Cycle</title>
+<link rel="next" href="ch-technical.html" title="Technical Lemmas" />
+<link rel="prev" href="ch-sleep.html" title="Sleep Dynamics" />
+<link rel="up" href="index.html" title="a math loop that sleeps and dreams" />
+<link rel="stylesheet" href="styles/theme-white.css" /><link rel="stylesheet" href="styles/theme-sleepy.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">a math loop that sleeps and dreams</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref">1</span> <span class="toc_entry">Definitions</span></a>
+ </li>
+<li class="">
+  <a href="ch-rigidity.html"><span class="toc_ref">2</span> <span class="toc_entry">Rigidity</span></a>
+ </li>
+<li class="">
+  <a href="ch-core.html"><span class="toc_ref">3</span> <span class="toc_entry">Core Dynamics</span></a>
+ </li>
+<li class="">
+  <a href="ch-sleep.html"><span class="toc_ref">4</span> <span class="toc_entry">Sleep Dynamics</span></a>
+ </li>
+<li class=" active current">
+  <a href="ch-capture.html"><span class="toc_ref">5</span> <span class="toc_entry">Capture-Consolidation Cycle</span></a>
+ </li>
+<li class="">
+  <a href="ch-technical.html"><span class="toc_ref">6</span> <span class="toc_entry">Technical Lemmas</span></a>
+ </li>
+<li class="">
+  <a href="ch-appendix.html"><span class="toc_ref">7</span> <span class="toc_entry">Appendix</span></a>
+ </li>
+<li class="">
+ </li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="ch:capture">5 Capture-Consolidation Cycle</h1>
+
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:capture_argmax">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">75</span>
+    <span class="theorem_thmtitle">Capture-argmax bound; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  GenericEmbedding def:capture, def:consolidation, def:retrieval, lem:hull Let the system run under constant \(S\) with both capture and consolidation enabled. Assume generic embedding \(E\): for any \(q \in \operatorname {conv}(E(X))\), \(\operatorname {argmax}_\tau q^\top E(\tau )\) is unique. Then </p>
+<div class="displaymath" id="a0000000088">
+  \[  \text{(total captures)} \; \leq \;  \text{(total $E$-argmax transitions of $q$)} + 1.  \]
+</div>
+<p> Within any period where \(\tau ^* = \operatorname {argmax}_\tau q^\top E(\tau )\) is constant, capture fires at most once. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000089">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:capture, def:consolidation, def:retrieval, lem:hull See Lean source: <span class="ttfamily">CaptureInertness/CaptureArgmax.lean</span> </p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:capture_inertness">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">76</span>
+    <span class="proposition_thmtitle">Perturbative capture inertness; softmax (part (i) needs only \(\mathcal{A}_+\))</span>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  equilibriumScoreGap def:accumulation, def:capture, def:retrieval, lem:finite_argmax, lem:sigma_increment, lem:softmax_lipschitz, thm:capture_argmax Under the hypotheses of Theorem&#160;<a href="ch-capture.html#thm:capture_argmax">75</a>, let \(q_0^* = \lim _{t \to \infty } q_t^{K=0}\) denote the equilibrium query of the \(K = 0\) system (existence proven below). Define the <em>equilibrium score gap</em> </p>
+<div class="displaymath" id="a0000000090">
+  \[  \delta _0 = (q_0^*)^\top E(\tau ^*) - \max _{\tau \neq \tau ^*} (q_0^*)^\top E(\tau ), \qquad \tau ^* = \operatorname {argmax}_\tau \,  (q_0^*)^\top E(\tau ).  \]
+</div>
+<p> For generic \(E\) and \(S\), \(\delta _0 {\gt} 0\) (the argmax at \(q_0^*\) is unique). Let \(R = \max _\tau \| E(\tau )\| \) and \(\sigma _{\min } = \min _\tau \sigma _0^*(\tau ) {\gt} 0\) (the minimum equilibrium salience under \(K = 0\), positive by \(\mathcal{A}_+\)). If </p>
+<div class="displaymath" id="a0000000091">
+  \[  \| K\|  {\lt} \frac{\delta _0}{4R^4(1 + 1/\sigma _{\min })},  \]
+</div>
+<p> then there exists a finite \(T^*\) such that for all \(t {\gt} T^*\), capture is inert. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000092">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:accumulation, def:capture, def:retrieval, lem:finite_argmax, lem:sigma_increment, lem:softmax_lipschitz, thm:capture_argmax See Lean source: <span class="ttfamily">CaptureInertness/PerturbativeInertness.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:K_zero_inertness">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">77</span>
+    <span class="corollary_thmtitle">\(K = 0\) capture inertness; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  K_zero_capture_finite def:accumulation, def:capture, def:retrieval, thm:capture_argmax When \(K = 0\), the total number of capture events is finite under any constant \(S\) with generic \(E\). No condition on \(\| K\| \) is needed. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000093">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:accumulation, def:capture, def:retrieval, thm:capture_argmax See Lean source: <span class="ttfamily">CaptureInertness/KZeroInertness.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:forced_cycle_general_K">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">78</span>
+    <span class="corollary_thmtitle">Forced cycle covers general \(K\); softmax</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  forced_cycle_general_K def:capture, def:retrieval, thm:capture_argmax For any \(K\) (including \(\| K\|  \geq \delta _0/(4R^4(1 + 1/\sigma _{\min }))\)), the system is forced into alternating capture and consolidation regimes. Spontaneous capture inertness is not guaranteed, but the carrying capacity mechanism of Corollary&#160;<a href="ch-capture.html#cor:forced_cycle">84</a> intervenes: \(|M|\) reaches \(|M^*|\), retrieval degrades below any threshold, and the external sleep gate (Proposition&#160;<a href="ch-capture.html#prop:sleep_gate">86</a>) triggers consolidation. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000094">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:capture, def:retrieval, thm:capture_argmax See Lean source: <span class="ttfamily">CaptureInertness/ForcedCycleGeneralK.lean</span> </p>
+
+  </div>
+</div>
+<div class="remark_thmwrapper theorem-style-remark" id="rem:K_spectrum">
+  <div class="remark_thmheading">
+    <span class="remark_thmcaption">
+    Remark
+    </span>
+    <span class="remark_thmlabel">79</span>
+    <span class="remark_thmtitle">\(K\)-spectrum</span>
+  </div>
+  <div class="remark_thmcontent">
+  <p>  forced_cycle_general_K def:capture, def:retrieval, thm:capture_argmax The results partition the parameter space of \(K\) into three regimes: </p>
+<div class="centered"> <table class="tabular">
+  <tr>
+    <td  style="border-top-style:solid; border-top-color:black; border-top-width:1px" 
+        rowspan=""
+        colspan="">
+      <p> <b class="bfseries">Regime</b> </p>
+
+    </td>
+    <td  style="border-top-style:solid; border-top-color:black; border-top-width:1px" 
+        rowspan=""
+        colspan="">
+      <p> <b class="bfseries">Condition</b> </p>
+
+    </td>
+    <td  style="border-top-style:solid; border-top-color:black; border-top-width:1px; text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> <b class="bfseries">Mechanism</b> </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="border-top-style:solid; border-top-color:black; border-top-width:1px" 
+        rowspan=""
+        colspan="">
+      <p>\(K = 0\) </p>
+
+    </td>
+    <td  style="border-top-style:solid; border-top-color:black; border-top-width:1px" 
+        rowspan=""
+        colspan="">
+      <p> \(b = 0\) </p>
+
+    </td>
+    <td  style="border-top-style:solid; border-top-color:black; border-top-width:1px; text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> \(\sigma \) converges independently; captures finite </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="None" 
+        rowspan=""
+        colspan="">
+      <p>Small \(K\) </p>
+
+    </td>
+    <td  style="None" 
+        rowspan=""
+        colspan="">
+      <p> \(\| K\|  {\lt} \delta _0/(4R^4(1 + 1/\sigma _{\min }))\) </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Perturbative: \(q\) tracks \(K{=}0\) trajectory </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="border-bottom-style:solid; border-bottom-color:black; border-bottom-width:1px" 
+        rowspan=""
+        colspan="">
+      <p>General \(K\) </p>
+
+    </td>
+    <td  style="border-bottom-style:solid; border-bottom-color:black; border-bottom-width:1px" 
+        rowspan=""
+        colspan="">
+      <p> No bound on \(\| K\| \) </p>
+
+    </td>
+    <td  style="text-align:left; border-bottom-style:solid; border-bottom-color:black; border-bottom-width:1px" 
+        rowspan=""
+        colspan="">
+      <p> Forced cycle via carrying capacity \(|M^*|\) </p>
+
+    </td>
+  </tr>
+</table> </div>
+<p>For \(K = 0\), capture becomes inert unconditionally (Corollary&#160;<a href="ch-capture.html#cor:K_zero_inertness">77</a>). For small \(K\), capture becomes inert before carrying capacity is reached (Proposition&#160;<a href="ch-capture.html#prop:capture_inertness">76</a>). For general \(K\), the forced cycle (Corollary&#160;<a href="ch-capture.html#cor:forced_cycle">84</a>) is the operative mechanism. Numerical experiments suggest capture self-terminates under constant \(S\) for all tested \(\| K\| \) (Figure&#160;??, right), well beyond the perturbative bound; closing this gap analytically is an open problem (Remark&#160;<a href="ch-capture.html#rem:phase_decomposition">81</a>). </p>
+<p>For \(K = 0\), the system’s transition out of capture is internally driven, resembling voluntary disengagement; for large \(K\), it is forced by capacity limits, resembling involuntary shutdown under exhaustion. The perturbative regime interpolates between these. </p>
+
+  </div>
+</div>
+<div class="remark_thmwrapper theorem-style-remark" id="rem:threshold">
+  <div class="remark_thmheading">
+    <span class="remark_thmcaption">
+    Remark
+    </span>
+    <span class="remark_thmlabel">80</span>
+    <span class="remark_thmtitle">Numerical illustration of the perturbative threshold</span>
+  </div>
+  <div class="remark_thmcontent">
+  <p>  equilibriumScoreGap def:accumulation, def:capture, def:retrieval, lem:finite_argmax, lem:sigma_increment, lem:softmax_lipschitz, thm:capture_argmax For \(|X| = 10\) stimuli with random unit embeddings in \(\mathbb {R}^8\) (\(R = 1\)) and \(S(\tau _0) = 1\), \(S(\tau ) = 0\) otherwise, the \(K = 0\) equilibrium has \(\sigma _{\min } = 0.283\), \(\delta _0 = 0.008\), giving a perturbative threshold \(\| K\|  {\lt} 4.4 \times 10^{-4}\). This bound is conservative: numerically, capture self-terminates for \(\| K\| \) up to at least \(10\) (the largest value tested), a factor of \({\sim }\, 2 \times 10^4\) beyond the bound. The gap \(\delta _0\) varies by two orders of magnitude across stimulus directions (\(0.001\) to \(0.15\)), with the threshold tracking accordingly. Even with near-degenerate embeddings (angular spread \(0.01\) radians), capture self-terminates for all tested \(\| K\| \). </p>
+
+  </div>
+</div>
+<div class="remark_thmwrapper theorem-style-remark" id="rem:phase_decomposition">
+  <div class="remark_thmheading">
+    <span class="remark_thmcaption">
+    Remark
+    </span>
+    <span class="remark_thmlabel">81</span>
+    <span class="remark_thmtitle">Phase decomposition and open problem</span>
+  </div>
+  <div class="remark_thmcontent">
+  <p>  equilibriumScoreGap def:accumulation, def:capture, def:retrieval, lem:finite_argmax, lem:sigma_increment, lem:softmax_lipschitz, thm:capture_argmax A finer analysis of the consolidation total variation suggests a wider stability region than the perturbative condition \(\| K\|  {\lt} \delta _0/(4R^4(1 + 1/\sigma _{\min }))\). Within each capture-free interval, the consolidation dynamics decompose into two phases: </p>
+<ol class="enumerate">
+  <li><p><em>Geometric phase</em>: \(V\) is large, \(\gamma \geq \gamma _0(|M|) {\gt} 0\), and \(V\) decays geometrically. The consolidation total variation satisfies \(\mathrm{TV}_I \leq C_{\mathrm{consol}} \cdot 2R/\gamma _0(|M|)\). </p>
+</li>
+  <li><p><em>Self-limiting phase</em>: \(V\) is small, \(\gamma \sim c \cdot V\), and \(V \sim 1/(ct)\). The consolidation total variation satisfies \(\mathrm{TV}_{II} = O(\ln T)\). </p>
+</li>
+</ol>
+<p> The bridge bound (\(\| \Delta \ell ^{\mathrm{consol}}\|  \leq 2V\)), the \(\gamma \geq c \cdot V\) scaling, and the anchor-switch recovery are all valid within a single interval. </p>
+<p>The gap: \(\gamma _0(m) \geq \lambda _1 \exp (-4R^2)/(2m)\), so \(\mathrm{TV}_I\) grows with \(|M|\). Under the infinite-captures assumption, \(|M| \to \infty \), and summing \(\mathrm{TV}_I\) over intervals produces \(O(n^2)\) growth rather than \(O(n)\). The contradiction argument does not close. </p>
+<p>Numerical experiments confirm the \(1/|M|\) scaling: under adversarial conditions (rotating \(S\) forcing \(|M|\) past 1700), \(\alpha _v \approx 1.1/|M|\) with the ratio \(\alpha _v / (\exp (-4R^2)/|M|)\) stable at \({\approx }\, 58\)–\(62\) across all \(|M|\) (Figure&#160;??, left). This rules out an \(|M|\)-independent lower bound on \(\alpha _v^{(j)}\) as a resolution strategy. </p>
+<p>Under constant \(S\) (the setting of Proposition&#160;<a href="ch-capture.html#prop:capture_inertness">76</a>), capture self-terminates within \({\sim }\, 10\) steps for all \(\| K\| \) tested (\(0\) to \(5\)), well before the gap regime is reached (Figure&#160;??, right). The gap is mathematically genuine but dynamically inert under the paper’s assumptions. </p>
+<p>Two viable resolution strategies remain: bounding the total path length of \(\ell \) directly (bypassing \(\gamma _0\)), or a joint contraction argument on the coupled \((V, q)\) system. Either would extend Proposition&#160;<a href="ch-capture.html#prop:capture_inertness">76</a> to a wider range of \(\| K\| \). This is an open problem. </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:maturation">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">82</span>
+    <span class="corollary_thmtitle">Sleep need declines with memory maturation; softmax</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  maturation_capture_rate_declines def:cluster, def:cluster_salience, def:inter_cluster_sep, def:retrieval Consider the loop operating over repeated wake–sleep cycles. Let \(p_n\) denote the number of unconsolidated clusters at the start of cycle \(n\), and let \(\tau _n\) denote the capture rate (captures per unit time) during the waking phase of cycle \(n\). Then: </p>
+<ol class="enumerate">
+  <li><p><b class="bfseries">Capture rate declines with maturation (under stationary stimuli).</b> As the number of consolidated prototypes in \(M\) grows across cycles, the capture threshold \(\max _{k \in M} q^\top m_k\) is non-decreasing in \(|M|\): adding a new prototype \(m_{\mathrm{new}}\) to \(M\) can only increase \(\max _k q^\top m_k\) (it adds a candidate to the maximum). Therefore, for any fixed query distribution, the fraction of stimuli \(E(\tau )\) satisfying \(q^\top E(\tau ) {\gt} \max _k q^\top m_k\) is non-increasing in \(|M|\). Under the assumption of a stationary stimulus distribution, the expected capture rate \(\mathbb {E}[\tau _n]\) is non-increasing across cycles. </p>
+</li>
+  <li><p><b class="bfseries">Waking period lengthens.</b> The time to reach the critical memory size \(|M^*|\) from a post-sleep baseline \(|M_0^{(n)}|\) is \(T_{\mathrm{wake}}^{(n)} = (|M^*| - |M_0^{(n)}|)/\tau _n\). Since \(\mathbb {E}[\tau _n]\) is non-increasing (part&#160;(i)), \(T_{\mathrm{wake}}^{(n)}\) is non-decreasing in expectation: the system can sustain longer waking periods before retrieval degrades. </p>
+</li>
+  <li><p><b class="bfseries">Sleep duration shortens.</b> By Corollary&#160;<a href="ch-sleep.html#cor:sleep_duration">61</a>, the total sleep time scales as \(\sum _{k=1}^{p_n} T_k\). After many cycles of full consolidation, newly captured impressions are close to existing prototypes (since the embedding space is well-covered), so the initial intra-cluster spread \(V_k(0)\) is smaller and fewer distinct clusters \(p_n\) form. Both effects reduce total sleep duration. </p>
+</li>
+  <li><p><b class="bfseries">Combined effect.</b> The ratio of sleep to total cycle time satisfies </p>
+<div class="displaymath" id="a0000000095">
+  \[  \frac{T_{\mathrm{sleep}}^{(n)}}{T_{\mathrm{wake}}^{(n)} + T_{\mathrm{sleep}}^{(n)}} \; \leq \;  \frac{\sum _k O(\log (V_k^{(n)}(0)/\delta )/\gamma _k)}{(|M^*| - |M_0^{(n)}|)/\tau _n + \sum _k O(\log (V_k^{(n)}(0)/\delta )/\gamma _k)}.  \]
+</div>
+<p> As \(\tau _n \to 0\) and \(p_n\), \(V_k^{(n)}(0)\) decrease with maturation, this ratio decreases: the system needs proportionally less consolidation time per cycle. </p>
+</li>
+</ol>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000096">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:cluster, def:cluster_salience, def:inter_cluster_sep, def:retrieval See Lean source: <span class="ttfamily">Sleep/Maturation.lean</span> </p>
+
+  </div>
+</div>
+<div class="remark_thmwrapper theorem-style-remark" id="rem:development">
+  <div class="remark_thmheading">
+    <span class="remark_thmcaption">
+    Remark
+    </span>
+    <span class="remark_thmlabel">83</span>
+    <span class="remark_thmtitle">Developmental sleep patterns</span>
+  </div>
+  <div class="remark_thmcontent">
+  <p>  maturation_capture_rate_declines def:cluster, def:cluster_salience, def:inter_cluster_sep, def:retrieval A system with few prototypes captures nearly everything and requires long consolidation phases; a system with a dense embedding space captures rarely and consolidates fast. The result depends on no aging-specific mechanism, following entirely from the interaction of the capture threshold with prototype density. The parallel to the well-documented decline in sleep need across the lifespan is one of several independently derived correspondences (Section&#160;??). </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:forced_cycle">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">84</span>
+    <span class="corollary_thmtitle">Forced quasi-periodic sleep–wake cycle; softmax</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  forced_cycle_waking_degrades def:cluster, def:cluster_salience, def:inter_cluster_sep, def:retrieval Let \(\varphi \) be a continuous positive simplex map. Consider the loop with capture enabled during waking and consolidation enabled during sleep (\(S = 0\), capture disabled). Suppose the external score \(S\) is such that waking produces a positive capture rate (at least one new impression enters \(M\) per \(\tau \) steps on average). Then: </p>
+<ol class="enumerate">
+  <li><p><b class="bfseries">Waking degrades retrieval.</b> During waking, \(|M|\) grows monotonically. By Theorem&#160;<a href="ch-sleep.html#thm:sleep_pressure">47</a>, the retrieval concentration \(\rho = \max _j w_j\) degrades as \(\rho \leq 1/|M|\) (for uniform inputs) and more generally \(\rho \) decreases monotonically (Theorem&#160;<a href="ch-sleep.html#thm:monotone_pressure">50</a>). The system reaches a critical memory size \(|M^*|\) (Theorem&#160;<a href="ch-sleep.html#thm:sleep_pressure">47</a>) beyond which retrieval precision falls below any desired threshold. </p>
+</li>
+  <li><p><b class="bfseries">Degradation is self-observable.</b> The pair \((\rho , \gamma )\) computed from the system’s own state variables distinguishes functional from degraded operation (Theorem&#160;<a href="ch-sleep.html#thm:self_observable">53</a>). As \(|M| \to |M^*|\), the system enters the exhaustion regime: \(\rho \to 1/|M|\) and \(\gamma \to 0\) with \(V\) bounded away from zero. </p>
+</li>
+  <li><p><b class="bfseries">The \(S = 0\) phase is necessary and sufficient.</b> Entering an \(S = 0\) phase with capture disabled triggers consolidation (Theorem&#160;<a href="ch-sleep.html#thm:sleep_efficacy">49</a>). The Lyapunov function \(V\) decreases strictly at each step (Lemma&#160;<a href="ch-core.html#lem:lyapunov">29</a>), multi-cluster memory undergoes sequential consolidation with oscillatory \(\gamma \) (Theorem&#160;<a href="ch-sleep.html#thm:oscillation">58</a>), dream-like inter-episode transitions occur between clusters (Theorem&#160;<a href="ch-sleep.html#thm:dream_transitions">70</a>), and the system eventually reaches a quasi-fixed point (Theorem&#160;<a href="ch-sleep.html#thm:wakeup">52</a>). </p>
+</li>
+  <li><p><b class="bfseries">Wake-up is self-observable.</b> Sleep completion is detectable by \(\gamma \to 0\) with \(\rho \) recovering to \(\rho \geq 1/(1 + (p-1)\exp (-\beta g_p))\) where \(p\) is the number of consolidated prototypes and \(g_p\) is the inter-prototype score gap (Theorem&#160;<a href="ch-sleep.html#thm:sleep_efficacy">49</a>(iii)). This is the completion regime of Theorem&#160;<a href="ch-sleep.html#thm:self_observable">53</a>: \(V \to 0\), \(\gamma \to 0\), and \(\rho \) bounded away from \(1/|M|\). For a single cluster (\(p = 1\)), \(\rho \to 1\); for \(p \geq 2\) well-separated prototypes, \(\rho \) recovers to a value determined by the cluster geometry but still far above the pre-sleep degraded level \(\rho \to 1/|M|\). </p>
+</li>
+  <li><p><b class="bfseries">The cycle repeats.</b> Once waking resumes, capture begins adding new impressions to \(M\), retrieval degrades anew (Theorem&#160;<a href="ch-sleep.html#thm:monotone_pressure">50</a>), and the system again approaches the critical size \(|M^*|\). Since each waking phase strictly increases \(|M|\) (by assumption) and each sleep phase consolidates \(M\) to \(p\) prototypes (Theorem&#160;<a href="ch-sleep.html#thm:oscillation">58</a>(vi)), the system oscillates between: </p>
+<ul class="itemize">
+  <li><p><em>Waking</em>: \(|M|\) grows, \(\rho \) decreases, \(V\) increases. </p>
+</li>
+  <li><p><em>Sleep</em>: \(|M|\) is fixed (capture disabled), \(\rho \) recovers, \(V\) decreases, with internal dream transitions. </p>
+</li>
+</ul>
+<p> This oscillation is quasi-periodic: the cycle length depends on the capture rate during waking and the cluster structure at sleep onset, both of which vary across cycles, but the qualitative structure (wake \(\to \) degrade \(\to \) sleep \(\to \) recover \(\to \) wake) is invariant. </p>
+</li>
+  <li><p><b class="bfseries">Sleep debt modulates cycle structure.</b> If sleep is insufficient (duration \({\lt} T_{\mathrm{full}}\), Corollary&#160;<a href="ch-sleep.html#cor:sleep_duration">61</a>), a residual \(V_{\mathrm{res}} {\gt} 0\) persists (Theorem&#160;<a href="ch-sleep.html#thm:sleep_debt">64</a>). This residual adds to the degradation of the next waking phase, shortening the effective waking capacity and advancing the next sleep onset. Chronic insufficient sleep produces compounding debt \(V_\infty = r\Delta V / (1 - r)\) (Theorem&#160;<a href="ch-sleep.html#thm:sleep_debt">64</a>(ii)), eventually exceeding the cluster separation \(\epsilon _{\mathrm{sep}}\) beyond which the system enters permanent degradation during truncated-sleep cycles (Theorem&#160;<a href="ch-sleep.html#thm:sleep_debt">64</a>(iii)). Full-length recovery sleep can still eliminate the accumulated debt (Theorem&#160;<a href="ch-sleep.html#thm:sleep_debt">64</a>(iv)), but at logarithmic cost in the debt level. Conversely, naps (Theorem&#160;<a href="ch-appendix.html#thm:nap">98</a>) provide partial recovery with front-loaded benefit, allowing the system to extend waking capacity at the cost of reduced total consolidation. </p>
+</li>
+</ol>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000097">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:cluster, def:cluster_salience, def:inter_cluster_sep, def:retrieval See Lean source: <span class="ttfamily">Sleep/ForcedCycle.lean</span> </p>
+
+  </div>
+</div>
+<div class="remark_thmwrapper theorem-style-remark" id="rem:emergent_cycle">
+  <div class="remark_thmheading">
+    <span class="remark_thmcaption">
+    Remark
+    </span>
+    <span class="remark_thmlabel">85</span>
+    <span class="remark_thmtitle">The capture–consolidation cycle as an emergent property</span>
+  </div>
+  <div class="remark_thmcontent">
+  <p>  forced_cycle_waking_degrades def:cluster, def:cluster_salience, def:inter_cluster_sep, def:retrieval The cycle is forced by a tension: capture degrades retrieval (Theorem&#160;<a href="ch-sleep.html#thm:sleep_pressure">47</a>), but consolidation can only proceed when capture stops (the Lyapunov function requires a stable \(M\)). The system detects its own state through \((\rho , \gamma )\) (Theorem&#160;<a href="ch-sleep.html#thm:self_observable">53</a>), which suffice to distinguish degradation from completion (Theorem&#160;<a href="ch-sleep.html#thm:self_observable">53</a>). The only thing the loop cannot do is flip its own switch: \(S\) is an input, not a state variable, so an external controller must read \((\rho , \gamma )\) and toggle the regime (Proposition&#160;<a href="ch-capture.html#prop:sleep_gate">86</a>). </p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:sleep_gate">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">86</span>
+    <span class="proposition_thmtitle">Necessity of an external sleep gate; \(\mathcal{A}\)</span>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  sleep_gate_external def:admissible_scoring, def:observation The loop cannot autonomously transition from waking (\(S \neq 0\), capture enabled) to the \(S = 0\) consolidation regime. The external score \(S(\tau )\) is an input to the system (Definition&#160;<a href="sect0001.html#def:observation">1</a>), not a state variable: no step of the loop modifies \(S\) or the capture-enable flag. Therefore, even when the self-observable sleep condition fires (\(\rho _t {\lt} c\) and \(\gamma _t {\lt} \epsilon \), Theorem&#160;<a href="ch-sleep.html#thm:self_observable">53</a>(d)), the system continues waking indefinitely unless an external controller reads \((\rho _t, \gamma _t)\) and sets \(S \leftarrow 0\) with capture disabled. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000098">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:admissible_scoring, def:observation See Lean source: <span class="ttfamily">Sleep/SleepGate.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:insomnia">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">87</span>
+    <span class="corollary_thmtitle">Cost of ignoring the sleep signal; softmax</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  insomnia_memory_grows Suppose the sleep condition fires at time \(t_0\) (i.e. \(\rho _{t_0} {\lt} c\), \(\gamma _{t_0} {\lt} \epsilon \)) but no regime transition occurs: \(S\) remains non-zero and capture remains enabled for \(k\) additional steps. Then: </p>
+<ol class="enumerate">
+  <li><p>\(|M|\) continues to grow (Theorem&#160;<a href="ch-sleep.html#thm:monotone_pressure">50</a>(iii)), with \(\rho \) degrading further. </p>
+</li>
+  <li><p>By Theorem&#160;<a href="ch-sleep.html#thm:sleep_debt">64</a>(ii), each additional waking step adds to the consolidation deficit. The eventual sleep duration required to recover to tolerance \(\delta \) satisfies \(T_{\mathrm{sleep}} \geq \log (V_{t_0+k}/\delta )/\gamma _{\min }\), which grows as \(O(\log k)\) in the number of ignored steps (Theorem&#160;<a href="ch-sleep.html#thm:score_boost">67</a>(iii)). </p>
+</li>
+  <li><p>If the signal is ignored indefinitely (\(k \to \infty \)), the system enters permanent degradation: \(\rho \to 1/|M| \to 0\) and \(\gamma \to 0\), with \(V\) bounded away from zero and growing. No amount of waking consolidation can reverse this (Theorem&#160;<a href="ch-sleep.html#thm:sleep_pressure">47</a>(v)). </p>
+</li>
+</ol>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000099">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>See Lean source: <span class="ttfamily">Sleep/Insomnia.lean</span> </p>
+
+  </div>
+</div>
+<div class="remark_thmwrapper theorem-style-remark" id="rem:controller">
+  <div class="remark_thmheading">
+    <span class="remark_thmcaption">
+    Remark
+    </span>
+    <span class="remark_thmlabel">88</span>
+    <span class="remark_thmtitle">The minimal controller</span>
+  </div>
+  <div class="remark_thmcontent">
+  <p>  insomnia_memory_grows Proposition&#160;<a href="ch-capture.html#prop:sleep_gate">86</a> establishes that the loop’s regime structure separates cleanly into two components: </p>
+<ol class="enumerate">
+  <li><p><b class="bfseries">Signal generation</b>: entirely internal (Theorem&#160;<a href="ch-sleep.html#thm:self_observable">53</a>). The quantities \((\rho , \gamma )\) are computable from the system’s own state, require no external oracle, and provide both the onset condition (\(\rho {\lt} c\), \(\gamma {\lt} \epsilon \)) and the completion condition (\(\gamma \to 0\) with \(\rho \) recovered). </p>
+</li>
+  <li><p><b class="bfseries">Signal execution</b>: requires a minimal external controller that reads \((\rho , \gamma )\) and toggles \(S\) and the capture flag. This controller need not be sophisticated: a threshold comparator on two scalar quantities suffices. </p>
+</li>
+</ol>
+<p> This separation (the system that generates the pressure signal is not the system that acts on it) is a structural property of the loop, not a limitation. Biological sleep regulation exhibits the same decomposition: homeostatic pressure accumulates internally, and a separate system reads the signal and executes the regime transition. The necessity of an external gate is itself a structural match. </p>
+<p>If the controller fails to act on the signal, the mathematical consequence is unbounded degradation (Corollary&#160;<a href="ch-capture.html#cor:insomnia">87</a>): logarithmic in the delay for recoverable cases, but permanent if the signal is ignored indefinitely <span class="cite">
+	[
+	
+</span>. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="ch-sleep.html" title="Sleep Dynamics"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="a math loop that sleeps and dreams"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="ch-technical.html" title="Technical Lemmas"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

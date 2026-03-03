@@ -1,0 +1,58 @@
+name: Blueprint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install leanblueprint
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz libgraphviz-dev
+          pip install leanblueprint
+
+      - name: Build blueprint
+        run: leanblueprint web
+
+      - name: Apply theme
+        run: |
+          WEB="blueprint/src/web"
+          cp blueprint/src/styles/theme-sleepy.css "$WEB/styles/"
+          sed -i 's|theme-white.css" />|theme-white.css" /><link rel="stylesheet" href="styles/theme-sleepy.css" />|g' "$WEB"/*.html
+          sed -i 's/A Math Loop That Sleeps and Dreams – Formalization Blueprint/a math loop that sleeps and dreams/g' "$WEB"/*.html
+          rm -f "$WEB/sect0002.html"
+          sed -i '/Bibliography/d' "$WEB"/*.html
+
+      - name: Upload Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: blueprint/src/web
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

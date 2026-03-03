@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>a math loop that sleeps and dreams: Core Dynamics</title>
+<link rel="next" href="ch-sleep.html" title="Sleep Dynamics" />
+<link rel="prev" href="ch-rigidity.html" title="Rigidity" />
+<link rel="up" href="index.html" title="a math loop that sleeps and dreams" />
+<link rel="stylesheet" href="styles/theme-white.css" /><link rel="stylesheet" href="styles/theme-sleepy.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">a math loop that sleeps and dreams</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref">1</span> <span class="toc_entry">Definitions</span></a>
+ </li>
+<li class="">
+  <a href="ch-rigidity.html"><span class="toc_ref">2</span> <span class="toc_entry">Rigidity</span></a>
+ </li>
+<li class=" active current">
+  <a href="ch-core.html"><span class="toc_ref">3</span> <span class="toc_entry">Core Dynamics</span></a>
+ </li>
+<li class="">
+  <a href="ch-sleep.html"><span class="toc_ref">4</span> <span class="toc_entry">Sleep Dynamics</span></a>
+ </li>
+<li class="">
+  <a href="ch-capture.html"><span class="toc_ref">5</span> <span class="toc_entry">Capture-Consolidation Cycle</span></a>
+ </li>
+<li class="">
+  <a href="ch-technical.html"><span class="toc_ref">6</span> <span class="toc_entry">Technical Lemmas</span></a>
+ </li>
+<li class="">
+  <a href="ch-appendix.html"><span class="toc_ref">7</span> <span class="toc_entry">Appendix</span></a>
+ </li>
+<li class="">
+ </li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="ch:core">3 Core Dynamics</h1>
+
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:N_history_independent">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">18</span>
+    <span class="corollary_thmtitle">History-independence of the lifetime counter; \(\mathcal{A}\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  lifetime_counter_history_independent def:accumulation For every \(\tau \in X\) and every \(t \geq 0\), \(N_t(\tau ) = N_0 + t\). The denominator of \(\sigma = C/N\) is independent of the attention history \(\{ a_s(\tau )\} _{s {\lt} t}\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000021">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:accumulation See Lean source: <span class="ttfamily">Core/HistoryIndependence.lean</span> </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:selective">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">19</span>
+    <span class="theorem_thmtitle">Selective persistence; \(\mathcal{A}\)</span>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  selective_persistence_decay def:accumulation Let \(\tau \in X\). </p>
+<ol class="enumerate">
+  <li><p>If \(a_t(\tau ) = 0\) for all \(t \geq T\), then \(\sigma _t(\tau ) \to 0\). </p>
+</li>
+  <li><p>If \(a_t(\tau ) \geq \delta {\gt} 0\) for all \(t\), then \(\liminf _{t \to \infty } \sigma _t(\tau ) \geq \sqrt{\delta }\). </p>
+</li>
+  <li><p>For any attention sequence \((a_t(\tau ))_{t \geq 0} \subseteq [0,1]\), \(\sigma _t(\tau ) = O(1)\). </p>
+</li>
+</ol>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000022">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:accumulation See Lean source: <span class="ttfamily">Core/SelectivePersistence.lean</span> </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:stability">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">20</span>
+    <span class="lemma_thmtitle">Retrieval-gated stability; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  anchor_unchanged_by_consolidation def:consolidation Let \(v = \arg \max _{k \in M} w_k\) at step \(t\). Then \(v\) is unchanged by consolidation, and the capture threshold in \(v\)’s direction never decreases. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000023">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:consolidation See Lean source: <span class="ttfamily">Core/RetrievalGatedStability.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:acquisition">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">21</span>
+    <span class="corollary_thmtitle">Monotone acquisition; \(\mathcal{A}\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  capture_card_nondecreasing def:capture \(|M|\) is non-decreasing: capture adds elements by union (Definition&#160;<a href="sect0001.html#def:capture">5</a>) and no operation removes them. The capture threshold \(\max _{k \in M} q^\top m_k\) is non-decreasing in \(|M|\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000024">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:capture See Lean source: <span class="ttfamily">Core/MonotoneAcquisition.lean</span> </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:hull">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">22</span>
+    <span class="lemma_thmtitle">Convex hull invariance; \(\mathcal{A}\)</span>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  consolidation_target_in_hull def:capture, def:consolidation For all \(t\), \(\operatorname {conv}(M_t) \subseteq \operatorname {conv}(E(X))\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000025">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:capture, def:consolidation See Lean source: <span class="ttfamily">Core/ConvexHullInvariance.lean</span> </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:finite">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">23</span>
+    <span class="lemma_thmtitle">Finite memory without consolidation; \(\mathcal{A}\)</span>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  finite_memory_without_consolidation def:capture, lem:hull If consolidation is disabled (i.e. \(\lambda \equiv 0\)), then \(|M_t| \leq |X|\) for all \(t\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000026">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:capture, lem:hull See Lean source: <span class="ttfamily">Core/FiniteMemory.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:bounded">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">24</span>
+    <span class="corollary_thmtitle">Bounded retrieval bias; \(\mathcal{A}\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  feedback_bias_bounded def:retrieval, lem:hull Let \(R = \max _{\tau \in X} \| E(\tau )\| \). Then \(|b(\tau )| \leq R^2 \| K\| _{\mathrm{op}}\) for all \(\tau \) and all \(t\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000027">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:retrieval, lem:hull See Lean source: <span class="ttfamily">Core/BoundedBias.lean</span> </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:nondegen">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">25</span>
+    <span class="theorem_thmtitle">Non-degeneracy; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  nondegeneracy cor:bounded, def:observation, thm:selective Let \(\varphi \in \mathcal{A}_+\) and suppose \(|S(\tau )| \leq B_S\) for all \(\tau \in X\) and all \(t\). Then there exists \(\alpha {\gt} 0\), depending only on \(\varphi \), \(B_S\), \(C_0\), \(|X|\), \(R = \max _\tau \| E(\tau )\| \), and \(\| K\| _{\mathrm{op}}\), such that \(a_t(\tau ) \geq \alpha \) for all \(\tau \in X\) and all \(t \geq 0\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000028">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>cor:bounded, def:observation, thm:selective See Lean source: <span class="ttfamily">Core/NonDegeneracy.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:retrieval_in_hull">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">26</span>
+    <span class="corollary_thmtitle">Retrieval output lies in convex hull; \(\mathcal{A}\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  retrieval_in_convex_hull def:retrieval, lem:hull For any query \(q\) with \(M \neq \emptyset \), the retrieval output \(\ell = wM\) satisfies \(\ell \in \operatorname {conv}(M) \subseteq \operatorname {conv}(E(X))\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000029">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:retrieval, lem:hull See Lean source: <span class="ttfamily">Core/RetrievalInHull.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:query_norm_bound">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">27</span>
+    <span class="corollary_thmtitle">Query vector norm bound; \(\mathcal{A}\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  query_norm_bounded def:retrieval For any step \(t\), the query vector satisfies \(\| q_t\|  \leq R\), where \(R = \max _{\tau \in X} \| E(\tau )\| \). Moreover, \(q_t \in \operatorname {conv}(E(X))\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000030">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:retrieval See Lean source: <span class="ttfamily">Core/QueryNormBound.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:blend_rate_bounds">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">28</span>
+    <span class="corollary_thmtitle">Bounds on the consolidation blend rate; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  blend_rate_anchor_zero def:consolidation Under any positive \(\varphi \) with \(|M| \geq 2\) and \(v = \arg \max _k w_k\) the unique maximizer of the retrieval weights, every blend rate satisfies \(0 \leq \lambda _j \leq 1\), with \(\lambda _v = 0\) for the anchor and \(0 {\lt} \lambda _j \leq 1\) for all \(j \neq v\). (Under the standing choice \(\lambda (r) = 1 - r\), the strict bound \(\lambda _j {\lt} 1\) holds; for a general admissible \(\lambda \) satisfying \(\lambda (0) = 1\), the value \(\lambda _j = 1\) is attainable when \(w_j/w_v \to 0\). Since \(\lambda _j = 1\) corresponds to full replacement \(m_j' = T_j\), which strengthens rather than weakens consolidation, all downstream results requiring \(\lambda _j {\gt} 0\) are unaffected.) </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000031">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:consolidation See Lean source: <span class="ttfamily">Core/BlendRateBounds.lean</span> </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:lyapunov">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">29</span>
+    <span class="lemma_thmtitle">Lyapunov function for fixed-query consolidation; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  consolidation_target_closer_than_V cor:blend_rate_bounds, def:consolidation, lem:stability Let \(\varphi \in \mathcal{A}_+\). Fix a query \(q\) and suppose capture is disabled. Let \(v = \arg \max _{k \in M} w_k\) where \(w = \varphi (qM^\top )\), and \(V(t) = \max _{j \neq v} \| m_j - v\| \). Then \(V(t+1) {\lt} V(t)\) whenever \(V(t) {\gt} 0\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000032">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>cor:blend_rate_bounds, def:consolidation, lem:stability See Lean source: <span class="ttfamily">Core/Lyapunov.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:contraction">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">30</span>
+    <span class="corollary_thmtitle">State-dependent contraction rate; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  contractionRate def:consolidation, lem:lyapunov Under the hypotheses of Lemma&#160;<a href="ch-core.html#lem:lyapunov">29</a>, let \(\alpha _v^{(j)}\) denote the weight that member \(j\)’s consolidation target places on the anchor \(v\). Then </p>
+<div class="displaymath" id="a0000000033">
+  \[  V(t+1) \leq (1 - \gamma (t))\, V(t), \qquad \gamma (t) = \min _{j \neq v}\, \lambda _j\bigl(1 - \sqrt{1 - \alpha _v^{(j)}}\bigr).  \]
+</div>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000034">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:consolidation, lem:lyapunov See Lean source: <span class="ttfamily">Core/ContractionRate.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:fan">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">31</span>
+    <span class="corollary_thmtitle">Retrieval weight dilution (fan effect); softmax</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  fan_effect def:retrieval Let \(\varphi = \operatorname {softmax}\) and \(q\) be fixed. If \(M' = M \cup \{ m_{\mathrm{new}}\} \) for some \(m_{\mathrm{new}} \notin M\), then for every \(j \in M\): </p>
+<div class="displaymath" id="a0000000035">
+  \[  [\operatorname {softmax}(q\, M'^\top )]_j {\lt} [\operatorname {softmax}(q\, M^\top )]_j.  \]
+</div>
+<p> In particular, \(\max _{j \in M}\, w_j\) is strictly decreasing as \(|M|\) grows. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000036">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:retrieval See Lean source: <span class="ttfamily">Core/FanEffect.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:opposition">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">32</span>
+    <span class="corollary_thmtitle">Retrieval weight bounds; softmax</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  retrieval_weight_lower_bound Under softmax with \(|M| = n\), the maximum retrieval weight for any single impression satisfies \(1/n \leq \max _j w_j \leq 1/(1 + (n-1)\exp (-g))\), where \(g = \max _j q^\top m_j - \max _{k \neq j} q^\top m_k\) is the score gap. The upper bound requires score gap \(g = \Omega (\log n)\) to remain bounded away from zero. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000037">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>See Lean source: <span class="ttfamily">Core/RetrievalWeightBounds.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:budget">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">33</span>
+    <span class="corollary_thmtitle">Attention budget constraint; \(\mathcal{A}\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  attention_sum_one def:observation Under any simplex map \(\varphi \), \(\sum _{\tau \in X} a_t(\tau ) = 1\) at every step. For \(|X| = n\) elements receiving nonzero attention, \(\bar{a} = 1/n\), and increasing \(n\) strictly decreases the mean attention per element. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000038">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:observation See Lean source: <span class="ttfamily">Core/AttentionBudget.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:sleep">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">34</span>
+    <span class="corollary_thmtitle">Convergence under repeated consolidation without capture; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  lyapunovV_nonneg cor:contraction, def:consolidation, lem:hull, lem:lyapunov Let \(\varphi \) be a continuous positive simplex map. Suppose capture is disabled and the query \(q\) is fixed. Then \(V(t) \to 0\): all impressions converge to the anchor \(v\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000039">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>cor:contraction, def:consolidation, lem:hull, lem:lyapunov See Lean source: <span class="ttfamily">Core/Convergence.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:selflimiting">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">35</span>
+    <span class="corollary_thmtitle">Vanishing contraction rate; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  contractionRate_le_sup_blendRate cor:blend_rate_bounds, cor:contraction, cor:sleep, def:consolidation Under the hypotheses of Corollary&#160;<a href="ch-core.html#cor:sleep">34</a> (fixed query, no capture), the contraction rate \(\gamma (t)\) satisfies \(\gamma (t) \to 0\) as \(t \to \infty \). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000040">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>cor:blend_rate_bounds, cor:contraction, cor:sleep, def:consolidation See Lean source: <span class="ttfamily">Core/SelfLimiting.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:prototype">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">36</span>
+    <span class="corollary_thmtitle">Prototype formation; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  prototype_formation cor:sleep, def:consolidation Under the hypotheses of Corollary&#160;<a href="ch-core.html#cor:sleep">34</a>, as \(t \to \infty \) every row of \(M\) converges to the anchor \(v = \arg \max _{k \in M} q^\top m_k\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000041">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>cor:sleep, def:consolidation See Lean source: <span class="ttfamily">Core/PrototypeFormation.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:variability">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">37</span>
+    <span class="corollary_thmtitle">Context variation prevents convergence to single prototype; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  context_variation_preserves_diversity cor:contraction, cor:sleep, def:consolidation Let \(\varphi \) be a continuous positive simplex map and \(|M| \geq 2\) with at least two distinct impressions. Under fixed query \(q\), \(V(t) \to 0\) (Corollary&#160;<a href="ch-core.html#cor:sleep">34</a>). Let \(T_{\mathrm{rot}}\) be the timescale on which the query varies (i.e. the anchor identity changes), and let \(\gamma (t) = \min _{j \neq v} \lambda _j(1 - \sqrt{1 - \alpha _v^{(j)}})\) be the contraction rate (Corollary&#160;<a href="ch-core.html#cor:contraction">30</a>). Suppose \(\gamma _{\min } := \min _{0 \leq t \leq T_{\mathrm{rot}}} \gamma (t) {\gt} 0\) (which holds whenever distinct impressions have distinct scores under the query throughout \([0, T_{\mathrm{rot}}]\)). If \(T_{\mathrm{rot}} {\lt} 1/\gamma _{\min }\), the anchor changes before \(V\) reaches zero, and distinct impressions are preserved. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000042">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>cor:contraction, cor:sleep, def:consolidation See Lean source: <span class="ttfamily">Core/ContextVariation.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:decay">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">38</span>
+    <span class="corollary_thmtitle">Hyperbolic decay; \(\mathcal{A}\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  accumulateC_constant_when_attention_zero def:accumulation If \(a_t(\tau ) = 0\) for all \(t \geq T\), then </p>
+<div class="displaymath" id="a0000000043">
+  \[  \sigma _t(\tau ) = \frac{C_T(\tau )}{N_0 + t},  \]
+</div>
+<p> where \(C_T(\tau )\) is the accumulated encoding strength at cessation. The decay is hyperbolic in \(t\) with rate constant determined by the encoding history. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000044">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:accumulation See Lean source: <span class="ttfamily">Core/ForgettingCurve.lean</span> </p>
+
+  </div>
+</div>
+<div class="remark_thmwrapper theorem-style-remark" id="rem:forgetting">
+  <div class="remark_thmheading">
+    <span class="remark_thmcaption">
+    Remark
+    </span>
+    <span class="remark_thmlabel">39</span>
+    <span class="remark_thmtitle">Forgetting curve</span>
+  </div>
+  <div class="remark_thmcontent">
+  <p>  accumulateC_constant_when_attention_zero def:accumulation Whether the forgetting curve is exponential or hyperbolic was debated for over a century after <span class="cite">
+</span>. <span class="cite">
+</span> tested 105 functional forms against 210 data sets and found that power-law (hyperbolic) forms consistently fit retention data best. The loop forces power-law decay, not exponential; this is the distinction debated in the literature. The specific exponent depends on the mapping from salience to behavioral measurement, which is outside the object. The power-law form itself is forced by the self-damping rigidity (Proposition&#160;<a href="ch-rigidity.html#prop:rigidity">9</a>). </p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:spacing">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">40</span>
+    <span class="proposition_thmtitle">Optimal spacing interval; \(\mathcal{A}\)</span>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  massed_accumulation_bound def:accumulation Fix \(n \geq 2\) observations of element \(\tau \) at intensity \(\delta {\gt} 0\), spaced \(K\) steps apart (observations at \(t = 0, K, 2K, \ldots , (n-1)K\)), and fix a retention interval \(R \geq 1\) after the last observation. The salience at evaluation time \(T = (n-1)K + R\) is </p>
+<div class="displaymath" id="a0000000045">
+  \[  \sigma (K) = \frac{\sqrt{C_0^2 + \delta K\, n(n-1) + 2\delta n}}{N_0 + (n-1)K + R}.  \]
+</div>
+<p> For large \(n\) and \(K\), \(\sigma (K) \approx n\sqrt{\delta K}/((n-1)K + R)\), which is maximized at </p>
+<div class="displaymath" id="a0000000046">
+  \[  K^* = \frac{R}{n - 1}.  \]
+</div>
+<p> The benefit curve is an inverted \(U\): \(\sigma \) increases for \(K {\lt} K^*\) and decreases for \(K {\gt} K^*\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000047">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:accumulation See Lean source: <span class="ttfamily">Core/SpacingEffect.lean</span> </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:cepeda">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">41</span>
+    <span class="corollary_thmtitle">Optimal spacing scales with retention interval; \(\mathcal{A}\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  massed_accumulation_bound def:accumulation The optimal inter-study interval \(K^* = R/(n-1)\) is linearly increasing in the retention interval \(R\). Longer retention requires wider spacing. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000048">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>def:accumulation See Lean source: <span class="ttfamily">Core/SpacingEffect.lean</span> </p>
+
+  </div>
+</div>
+<div class="remark_thmwrapper theorem-style-remark" id="rem:spacing">
+  <div class="remark_thmheading">
+    <span class="remark_thmcaption">
+    Remark
+    </span>
+    <span class="remark_thmlabel">42</span>
+    <span class="remark_thmtitle">Spacing effect</span>
+  </div>
+  <div class="remark_thmcontent">
+  <p>  massed_accumulation_bound def:accumulation <span class="cite">
+</span> found in a meta-analysis of 317 experiments that the optimal inter-study interval increases with the retention interval, and that the benefit of spacing over massing follows an inverted-\(U\) curve. The loop produces both the inverted \(U\) and the linear scaling \(K^* \propto R\) from the accumulation rule alone; both are forced by the accumulation rigidity (Proposition&#160;<a href="ch-rigidity.html#prop:rigidity">9</a>). </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:testing">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">43</span>
+    <span class="corollary_thmtitle">Selective preservation under retrieval; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  testing_effect cor:blend_rate_bounds Let \(\varphi \) be a positive simplex map with \(|M| \geq 2\) and distinct impressions. Retrieval of the anchor \(v = \arg \max _k w_k\) preserves \(v\) exactly (\(\lambda _v = 0\)) and displaces every competitor: \(\lambda _j {\gt} 0\) for all \(j \neq v\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000049">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>cor:blend_rate_bounds See Lean source: <span class="ttfamily">Core/TestingEffect.lean</span> </p>
+
+  </div>
+</div>
+<div class="remark_thmwrapper theorem-style-remark" id="rem:testing">
+  <div class="remark_thmheading">
+    <span class="remark_thmcaption">
+    Remark
+    </span>
+    <span class="remark_thmlabel">44</span>
+    <span class="remark_thmtitle">Testing effect</span>
+  </div>
+  <div class="remark_thmcontent">
+  <p>  testing_effect cor:blend_rate_bounds <span class="cite">
+</span> demonstrated that actively retrieving information produces better long-term retention than passive re-study. In the loop, retrieval and consolidation share the same weight vector \(w = \varphi (qM^\top )\): the act of retrieval is the act of selective preservation. The boundary condition \(\lambda (1) = 0\) that makes this work is forced (Proposition&#160;<a href="ch-rigidity.html#prop:consolidation_rigidity">6</a>). </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:crossover">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">45</span>
+    <span class="corollary_thmtitle">Retrieval advantage grows with delay; \(\mathcal{A}_+\)</span>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>  retrieval_crossover cor:decay, cor:testing, lem:lyapunov Compare two interventions at time \(T\): (a) re-observation of element \(\tau \), and (b) retrieval of impression \(v\) with \(\tau \) as the anchor. </p>
+<ol class="enumerate">
+  <li><p>Re-observation increases \(C(\tau )\) by at most \(1\), so the salience gain is \(\Delta \sigma \leq 1/(N_0 + T)\), which decays as \(O(1/t)\) at evaluation time \(t {\gt} T\). </p>
+</li>
+  <li><p>Retrieval contracts the Lyapunov function: \(V' {\lt} V\) (Lemma&#160;<a href="ch-core.html#lem:lyapunov">29</a>). The contraction is permanent and independent of the evaluation delay. </p>
+</li>
+</ol>
+<p> At sufficiently long delays, the permanent contraction dominates the transient salience boost. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000050">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>cor:decay, cor:testing, lem:lyapunov See Lean source: <span class="ttfamily">Core/RetrievalCrossover.lean</span> </p>
+
+  </div>
+</div>
+<div class="remark_thmwrapper theorem-style-remark" id="rem:crossover">
+  <div class="remark_thmheading">
+    <span class="remark_thmcaption">
+    Remark
+    </span>
+    <span class="remark_thmlabel">46</span>
+    <span class="remark_thmtitle">Crossover</span>
+  </div>
+  <div class="remark_thmcontent">
+  <p>  retrieval_crossover cor:crossover <span class="cite">
+</span> found that retrieval practice underperforms re-study at short delays but overtakes it at longer delays. The loop produces this crossover: re-study boosts \(\sigma \) (transient, \(O(1/t)\)); retrieval contracts \(V\) (permanent). </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="ch-rigidity.html" title="Rigidity"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="a math loop that sleeps and dreams"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="ch-sleep.html" title="Sleep Dynamics"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

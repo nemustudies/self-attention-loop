@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>a math loop that sleeps and dreams: Definitions</title>
+<link rel="next" href="ch-rigidity.html" title="Rigidity" />
+<link rel="prev" href="index.html" title="a math loop that sleeps and dreams" />
+<link rel="up" href="index.html" title="a math loop that sleeps and dreams" />
+<link rel="stylesheet" href="styles/theme-white.css" /><link rel="stylesheet" href="styles/theme-sleepy.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">a math loop that sleeps and dreams</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class=" active current">
+  <a href="sect0001.html"><span class="toc_ref">1</span> <span class="toc_entry">Definitions</span></a>
+ </li>
+<li class="">
+  <a href="ch-rigidity.html"><span class="toc_ref">2</span> <span class="toc_entry">Rigidity</span></a>
+ </li>
+<li class="">
+  <a href="ch-core.html"><span class="toc_ref">3</span> <span class="toc_entry">Core Dynamics</span></a>
+ </li>
+<li class="">
+  <a href="ch-sleep.html"><span class="toc_ref">4</span> <span class="toc_entry">Sleep Dynamics</span></a>
+ </li>
+<li class="">
+  <a href="ch-capture.html"><span class="toc_ref">5</span> <span class="toc_entry">Capture-Consolidation Cycle</span></a>
+ </li>
+<li class="">
+  <a href="ch-technical.html"><span class="toc_ref">6</span> <span class="toc_entry">Technical Lemmas</span></a>
+ </li>
+<li class="">
+  <a href="ch-appendix.html"><span class="toc_ref">7</span> <span class="toc_entry">Appendix</span></a>
+ </li>
+<li class="">
+ </li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000002">1 Definitions</h1>
+<div class="definition_thmwrapper theorem-style-definition" id="def:observation">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1</span>
+    <span class="definition_thmtitle">Observation (Step 1)</span>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  observe The perturbed score combines base salience, cumulative attention, and retrieval feedback: </p>
+<div class="equation" id="a0000000004">
+<p>
+  <div class="equation_content">
+    \begin{equation}  S'(\tau ) = S(\tau ) + \sigma (\tau ) + b(\tau ) \end{equation}
+  </div>
+  <span class="equation_label">1</span>
+</p>
+</div>
+<p> Attention is then allocated by applying a simplex map: </p>
+<div class="equation" id="a0000000005">
+<p>
+  <div class="equation_content">
+    \begin{equation}  a = \varphi (S') \in [0,1]^{|X|} \end{equation}
+  </div>
+  <span class="equation_label">2</span>
+</p>
+</div>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:accumulation">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">2</span>
+    <span class="definition_thmtitle">Accumulation (Step 2)</span>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  accumulateC </p>
+<div class="displaymath" id="a0000000006">
+  \begin{align}  C_{t+1}(\tau ) & = C_t(\tau ) + a_t(\tau ) \cdot \frac{t+1}{C_t(\tau )} \\ N_{t+1}(\tau ) & = N_t(\tau ) + 1 \\ \sigma _{t+1}(\tau ) & = \frac{C_{t+1}(\tau )}{N_{t+1}(\tau )} \end{align}
+</div>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:retrieval">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3</span>
+    <span class="definition_thmtitle">Retrieval (Step 3)</span>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  queryVector </p>
+<div class="displaymath" id="a0000000007">
+  \begin{align}  q & = aE \\ w & = \varphi (q\, M^\top ) \\ \ell (q, M) & = wM \\ b & = EK\ell \end{align}
+</div>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:consolidation">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">4</span>
+    <span class="definition_thmtitle">Consolidation (Step 4)</span>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  consolidationTarget def:retrieval </p>
+<div class="displaymath" id="a0000000008">
+  \begin{align}  \lambda _j & = \lambda \! \left(\frac{w_j}{\max _{k \in M}\, w_k}\right) \\ T(M, q) & = \varphi \bigl((M + q)\, M^\top \bigr)\, M \\ M’ & = (1 - \lambda )\, M + \lambda \, T(M, q) \end{align}
+</div>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:capture">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">5</span>
+    <span class="definition_thmtitle">Capture (Step 5)</span>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  captureThreshold def:retrieval Adopting the convention \(\max \emptyset = -\infty \): </p>
+<div class="equation" id="a0000000009">
+<p>
+  <div class="equation_content">
+    \begin{equation}  M_{t+1} = M_t \cup \{ E(\tau ) : q^\top E(\tau ) {\gt} \max _{k \in M_t}\, q^\top m_k\}  \end{equation}
+  </div>
+  <span class="equation_label">13</span>
+</p>
+</div>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="index.html" title="a math loop that sleeps and dreams"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="a math loop that sleeps and dreams"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="ch-rigidity.html" title="Rigidity"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>
