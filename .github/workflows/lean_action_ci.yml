@@ -42,17 +42,20 @@ jobs:
       - name: Install comparator tools
         run: |
           git clone --depth 1 --branch v4.28.0 https://github.com/leanprover/lean4export
-          cd lean4export && lake build
+          cd lean4export && lake build && cd ..
+          sudo cp lean4export/.lake/build/bin/lean4export /usr/local/bin/
           git clone --depth 1 --branch v0.1.15 https://github.com/Zouuup/landrun
-          cd landrun && go build -o landrun ./cmd/landrun && sudo cp landrun /usr/local/bin/
+          cd landrun && go build -o landrun ./cmd/landrun && sudo cp landrun /usr/local/bin/ && cd ..
           git clone --depth 1 https://github.com/leanprover/comparator
-          cd comparator && lake build
+          cd comparator && lake build && cd ..
 
       # comparator verifies ProofOfMainTheorem proves exactly the statement in
       # ComparatorChallenge (which imports MainTheorem's Mathlib-only types).
       # ComparatorChallenge.lean contains an intentional sorry as the challenge
       # target — it is never imported by any proof file.
       - name: Run comparator
-        run: lake env comparator/.lake/build/bin/comparator comparator.json
+        run: |
+          export PATH="$PWD/comparator/.lake/build/bin:$PWD/lean4export/.lake/build/bin:$PATH"
+          lake env comparator comparator.json
 
       # docgen removed — GitHub Pages used by blueprint workflow instead
