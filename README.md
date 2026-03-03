@@ -290,6 +290,8 @@ To rebuild locally:
 pip install leanblueprint
 bash scripts/build_blueprint.sh
 ```
+### ai tool disclosure
+llms were used in the development and writing of this paper
 
 ## Paper Reference
 
@@ -297,4 +299,4 @@ bash scripts/build_blueprint.sh
 
 ## License
 
-Apache 2.0.
+Creative Commons Attribution 4.0 International (CC BY 4.0)
