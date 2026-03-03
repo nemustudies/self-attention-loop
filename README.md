@@ -298,4 +298,4 @@ bash scripts/build_blueprint.sh
 
 ## License
 
-Apache 2.0.
+Creative Commons Attribution 4.0 International (CC BY 4.0)
