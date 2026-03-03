@@ -275,8 +275,8 @@ docker run --rm sleeploop-verify
 ```
 
 Runs all checks in an isolated container. Comparator may show SKIP on
-Docker Desktop (Windows/macOS) because landlock is unavailable in the VM —
-all other checks still run.
+Docker Desktop (Windows/macOS) because landlock is unavailable in the VM.
+All other checks still run.
 
 ## Blueprint
 
